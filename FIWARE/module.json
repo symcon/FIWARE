@@ -1,0 +1,12 @@
+{
+    "id": "{0146E9EA-C964-9F0C-089F-680283FF2228}",
+    "name": "FIWARE",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "FW",
+    "url": "https://symcon.de/"
+}

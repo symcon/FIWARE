@@ -1,0 +1,12 @@
+{
+    "id": "{77EFFF60-0B72-BDF7-4248-6D1C21254675}",
+    "author": "Symcon GmbH",
+    "name": "FIWARE",
+    "url": "https://symcon.de/",
+    "compatibility": {
+        "version": "5.2"
+    },
+    "version": "1.0",
+    "build": 0,
+    "date": 0
+}

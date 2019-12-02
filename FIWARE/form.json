@@ -1,0 +1,50 @@
+{
+    "elements": [
+        {
+            "type": "List",
+            "name": "WatchVariables",
+            "caption": "Variables",
+            "add": true,
+            "delete": true,
+            "columns": [
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "auto",
+                    "add": 0,
+                    "edit": {
+                      "type": "SelectVariable"
+                    }
+                },
+                {
+                    "caption": "Location",
+                    "name": "Location",
+                    "width" :"400px",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectLocation"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "ServerSettings",
+            "caption": "Server Settings",
+            "items": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Host",
+                    "caption": "Host",
+                    "width": "400px"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "AuthToken",
+                    "caption": "Authentication-Token",
+                    "width": "400px"
+                }
+            ]
+        }
+    ]
+}
