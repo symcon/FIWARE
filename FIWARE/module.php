@@ -71,7 +71,7 @@
 		{
 		    $this->SendDebug("Sending", "Sensor: " . $VariableID . ", Value: " . $Data[0] . ", Observed: " . date("d.m.Y H:i:s", $Data[3]), 0);
 
-			$url = $this->ReadPropertyString('Host') . '/Sensor_' . $VariableID . '/attrs';
+			$url = $this->ReadPropertyString('Host') . '/v2/entities/Sensor_' . $VariableID . '/attrs';
 			$token = $this->ReadPropertyString('AuthToken');
 
 			$data = [
@@ -119,7 +119,7 @@
 
 		private function CreateNewEntry($VariableID, $Data)
 		{
-			$url = $this->ReadPropertyString('Host');
+			$url = $this->ReadPropertyString('Host') . '/v2/entities';
 			$token = $this->ReadPropertyString('AuthToken');
 
 			$data = [
