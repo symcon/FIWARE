@@ -39,7 +39,7 @@
 
 		public function MessageSink($Timestamp, $SenderID, $MessageID, $Data)
 		{
-            $this->SendDebug("Collecting", "Sensor: " . $SenderID . ", Value: " . $Data[0] . ", Observed: " . date("d.m.Y H:i:s", $Data[4]));
+            $this->SendDebug("Collecting", "Sensor: " . $SenderID . ", Value: " . $Data[0] . ", Observed: " . date("d.m.Y H:i:s", $Data[4]), 0);
 
             if (IPS_SemaphoreEnter('SendVariablesSemaphore', 500)) {
 				$sendVariablesString = $this->GetBuffer('SendVariables');
@@ -69,7 +69,7 @@
 
 		public function SendData($VariableID, $Data)
 		{
-		    $this->SendDebug("Sending", "Sensor: " . $VariableID . ", Value: " . $Data[0] . ", Observed: " . date("d.m.Y H:i:s", $Data[4]));
+		    $this->SendDebug("Sending", "Sensor: " . $VariableID . ", Value: " . $Data[0] . ", Observed: " . date("d.m.Y H:i:s", $Data[4]), 0);
 
 			$url = $this->ReadPropertyString('Host') . '/Sensor_' . $VariableID . '/attrs';
 			$token = $this->ReadPropertyString('AuthToken');
