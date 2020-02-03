@@ -86,6 +86,7 @@
 					]
 				],
 				"dateObserved" => [
+					"type" => "DateTime",
 					"value" => date("Y-m-d\TH:i:sO", $Data[4])
 				],
 				"temperature" => [
@@ -136,6 +137,7 @@
 					]
 				],
 				"dateObserved" => [
+					"type" => "DateTime",
 					"value" => date("Y-m-d\TH:i:sO", $Data[4])
 				],
 				"temperature" => [
