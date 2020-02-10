@@ -76,7 +76,7 @@
 
 			$data = [
 				"name" => [
-					"value" => IPS_GetName($VariableID)
+					"value" => "urn:ngsi-ld:TemperatureObserved:" . IPS_GetName($VariableID)
 				],
 				"location" => [
 					"type" => "geo:json",
@@ -129,7 +129,7 @@
 				"type" => "TemperatureObserved",
 				"id" => "Sensor_$VariableID",
 				"name" => [
-					"value" => IPS_GetName($VariableID)
+					"value" => "urn:ngsi-ld:TemperatureObserved:" . IPS_GetName($VariableID)
 				],
 				"location" => [
 					"type" => "geo:json",
