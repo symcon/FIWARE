@@ -104,7 +104,9 @@
 					'method'  => 'PUT',
 					'header'  => "X-Auth-Token: $token\r\n".
 								 "Content-Type: application/json\r\n".
-								 'Content-Length:'. strlen($json) . "\r\n",
+								 'Content-Length:'. strlen($json) . "\r\n".
+					                         'fiware-service:':'inspire'. "\r\n",      
+
 					'content' => $json
 				]
 			];
@@ -155,7 +157,8 @@
 					'method'  => 'POST',
 					'header'  => "X-Auth-Token: $token\r\n".
 								 "Content-Type: application/json\r\n".
-								 'Content-Length:'. strlen($json) . "\r\n",
+								 'Content-Length:'. strlen($json) . "\r\n".
+					                         'fiware-service:':'inspire'. "\r\n",      
 					'content' => $json
 				]
 			];
