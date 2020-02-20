@@ -67,6 +67,11 @@
 		{
 		    $this->SendDebug("Sending", "Sensor: " . $VariableID . ", Value: " . $Data[0] . ", Observed: " . date("d.m.Y H:i:s", $Data[3]), 0);
 
+		    $variable = $this->GetVariableData($VariableID);
+			$location = json_decode($variable['Location'], true);
+			$category = $variable["Category"];
+			$controlledProperty = $variable["ControlledProperty"];
+			
 			$url = $this->ReadPropertyString('Host') . '/v2/op/update';
 			$token = $this->ReadPropertyString('AuthToken');
 
@@ -75,7 +80,7 @@
 				"type" => "Device",
 				"category" => [
 					"value" => [
-						"sensor"
+						$category
 					]
 				],
 				"value" => [
@@ -88,7 +93,7 @@
 				],
 				"controlledProperty" => [
 					"value" => [
-						"temperature"
+						$controlledProperty
 					]
 				],
 				"name" => [
@@ -104,7 +109,10 @@
 					"type" => "geo:json",
 					"value" => [
 						"type" => "Point",
-						"coordinates" => $this->GetLocation($VariableID)
+						"coordinates" => [
+							$location['longitude'], 
+							$location['latitude']
+						]
 					],
 					"metadata" => new stdClass()
 				],
@@ -153,18 +161,14 @@
 			return '';
 		}
 
-		private function GetLocation($VariableID)
+		private function GetVariableData($VariableID)
 		{
 			$variables = json_decode($this->ReadPropertyString('WatchVariables'), true);
 			foreach ($variables as $variable) {
 				if ($variable['VariableID'] == $VariableID) {
-					$location = json_decode($variable['Location'], true);
-					return [
-						$location['longitude'], 
-						$location['latitude']
-					];
+					return $variable;
 				}
 			}
-			return [0, 0];
+			return null;
 		}
 	}

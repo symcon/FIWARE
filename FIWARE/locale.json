@@ -5,6 +5,8 @@
         {
             "Variables": "Variablen",
             "Variable": "Variable",
+            "Category": "Kategorie",
+            "Controlled Property": "Gesteuerte Eigenschaft",
             "Location": "Standort",
             "Server Settings": "Server Einstellungen",
             "Host": "Host",
