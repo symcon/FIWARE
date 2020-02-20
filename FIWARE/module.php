@@ -14,7 +14,6 @@
 
 			//Timer
 			$this->RegisterTimer('SendDataTimer', 0, 'FW_SendMessageData($_IPS[\'TARGET\']);');
-		
 		}
 
 		public function Destroy()
@@ -29,12 +28,9 @@
 			parent::ApplyChanges();
 
 			$variableIDs = json_decode($this->ReadPropertyString('WatchVariables'), true);
-
 			foreach ($variableIDs as $variable) {
-				$variableID = $variable['VariableID'];
-				$this->RegisterMessage($variableID, VM_UPDATE);
+				$this->RegisterMessage($variable['VariableID'], VM_UPDATE);
 			}
-
 		}
 
 		public function MessageSink($Timestamp, $SenderID, $MessageID, $Data)
@@ -64,91 +60,71 @@
 						$this->SendData($update[0], $update[1]);
 					}
 				}
-            }
+			}
 		}
 
 		public function SendData($VariableID, $Data)
 		{
 		    $this->SendDebug("Sending", "Sensor: " . $VariableID . ", Value: " . $Data[0] . ", Observed: " . date("d.m.Y H:i:s", $Data[3]), 0);
 
-			$url = $this->ReadPropertyString('Host') . '/v2/entities/Sensor_' . $VariableID . '/attrs';
+			$url = $this->ReadPropertyString('Host') . '/v2/op/update';
 			$token = $this->ReadPropertyString('AuthToken');
 
-			$data = [
+			$entity = [
+				"id" => "urn:ngsi-ld:Device:Sensor". $VariableID,
+				"type" => "Device",
+				"category" => [
+					"value" => [
+						"sensor"
+					]
+				],
+				"value" => [
+					"value" => $Data[0],
+				],
+				"dateLastValueReported" => [
+					"type" => "DateTime",
+					"value" => date("Y-m-d\TH:i:sO", $Data[4]),
+					"metadata" => new stdClass()
+				],
+				"controlledProperty" => [
+					"value" => [
+						"temperature"
+					]
+				],
 				"name" => [
 					"value" => IPS_GetName($VariableID)
+				],
+				"description" => [
+					"value" => IPS_GetObject($VariableID)["ObjectInfo"]
+				],
+				"source" => [
+					"value" => "IP-Symcon LoRa Gateway"
 				],
 				"location" => [
 					"type" => "geo:json",
 					"value" => [
 						"type" => "Point",
 						"coordinates" => $this->GetLocation($VariableID)
+					],
+					"metadata" => new stdClass()
+				],
+				"configuration" => [
+					"type" => "Symcon",
+					"value" => [
+						"profile" => $this->GetVariableProfile($VariableID)
 					]
-				],
-				"dateObserved" => [
-					"type" => "DateTime",
-					"value" => date("Y-m-d\TH:i:sO", $Data[4])
-				],
-				"temperature" => [
-					"value" => $Data[0]
-				],
-				"variableProfile" => [
-					"value" => $this->GetVariableProfile($VariableID)
 				]
 			];
-
-			$json = json_encode($data);
-
-			$options = [
-				'http' => [
-					'method'  => 'PUT',
-					'header'  => "X-Auth-Token: $token\r\n".
-								 "Content-Type: application/json\r\n".
-								 'Content-Length:'. strlen($json) . "\r\n",
-					'content' => $json
-				]
-			];
-
-			$context = stream_context_create($options);
-
-			@file_get_contents($url, false, $context);
 			
-			if ($http_response_header[0] == 'HTTP/1.1 404 Not Found') {
-				$this->CreateNewEntry($VariableID, $Data);
-			}
-		}
-
-		private function CreateNewEntry($VariableID, $Data)
-		{
-			$url = $this->ReadPropertyString('Host') . '/v2/entities';
-			$token = $this->ReadPropertyString('AuthToken');
-
 			$data = [
-				"type" => "TemperatureObserved",
-				"id" => "Sensor_$VariableID",
-				"name" => [
-					"value" => IPS_GetName($VariableID)
-				],
-				"location" => [
-					"type" => "geo:json",
-					"value" => [
-						"type" => "Point",
-						"coordinates" => $this->GetLocation($VariableID)
-					]
-				],
-				"dateObserved" => [
-					"type" => "DateTime",
-					"value" => date("Y-m-d\TH:i:sO", $Data[4])
-				],
-				"temperature" => [
-					"value" => $Data[0]
-				],
-				"variableProfile" => [
-					"value" => $this->GetVariableProfile($VariableID)
+				"actionType" => "append",
+				"entities" => [
+					$entity
 				]
 			];
 
 			$json = json_encode($data);
+		    $this->SendDebug("Data", $json, 0);
 
 			$options = [
 				'http' => [
@@ -163,34 +139,32 @@
 			$context = stream_context_create($options);
 
 			file_get_contents($url, false, $context);
-
 		}
 
 		private function GetVariableProfile($VariableID)
 		{
-			if (IPS_GetVariable($VariableID)['VariableCustomProfile'] == '') {
-				if (IPS_GetVariable($VariableID)['VariableCustomProfile'] == '') {
-					return 'NoProfile';
-				} else {
-					return IPS_GetVariable($VariableID)['VariableCustomProfile'];
-				}
-			} else {
-				return IPS_GetVariable($VariableID)['VariableCustomProfile'];
+			$variable = IPS_GetVariable($VariableID);
+			if ($variable['VariableCustomProfile'] != '') {
+				return $variable['VariableCustomProfile'];
 			}
+			if ($variable['VariableProfile'] != '') {
+				return $variable['VariableProfile'];
+			}
+			return '';
 		}
-
 
 		private function GetLocation($VariableID)
 		{
 			$variables = json_decode($this->ReadPropertyString('WatchVariables'), true);
-
 			foreach ($variables as $variable) {
-				$variableID = $variable['VariableID'];
-				if ($variableID == $VariableID) {
+				if ($variable['VariableID'] == $VariableID) {
 					$location = json_decode($variable['Location'], true);
-					$returnLocation = [$location['latitude'], $location['longitude']];
-					return $returnLocation;
+					return [
+						$location['longitude'], 
+						$location['latitude']
+					];
 				}
 			}
+			return [0, 0];
 		}
 	}
