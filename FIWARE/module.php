@@ -43,7 +43,9 @@
 				$sendVariables[] = [$SenderID, $Data];
 				$this->SetBuffer('SendVariables', json_encode($sendVariables));
 				IPS_SemaphoreLeave('SendVariablesSemaphore');
-				$this->SetTimerInterval('SendDataTimer', 1000);
+				if($this->GetTimerInterval('SendDataTimer') == 0) {
+                    $this->SetTimerInterval('SendDataTimer', 500);
+                }
 			}
 		}
 		
@@ -56,79 +58,83 @@
 				IPS_SemaphoreLeave('SendVariablesSemaphore');
 				if ($sendVariables != '') {
 					$sendVariablesArray = json_decode($sendVariables, true);
+					$entities = [];
 					foreach ($sendVariablesArray as $update) {
-						$this->SendData($update[0], $update[1]);
+					    $variableID = $update[0];
+					    $data = $update[1];
+
+                        $this->SendDebug("Sending", "Sensor: " . $variableID . ", Value: " . $data[0] . ", Observed: " . date("d.m.Y H:i:s", $data[3]), 0);
+                        $entities[] = $this->BuildEntity($variableID, $data);
 					}
+                    $this->SendData($entities);
 				}
 			}
 		}
 
-		public function SendData($VariableID, $Data)
-		{
-		    $this->SendDebug("Sending", "Sensor: " . $VariableID . ", Value: " . $Data[0] . ", Observed: " . date("d.m.Y H:i:s", $Data[3]), 0);
+		private function BuildEntity($VariableID, $Data) {
+            $variable = $this->GetVariableData($VariableID);
+            $location = json_decode($variable['Location'], true);
+            $category = $variable["Category"];
+            $controlledProperty = $variable["ControlledProperty"];
 
-		    $variable = $this->GetVariableData($VariableID);
-			$location = json_decode($variable['Location'], true);
-			$category = $variable["Category"];
-			$controlledProperty = $variable["ControlledProperty"];
-			
+            return [
+                "id" => "urn:ngsi-ld:Device:Sensor". $VariableID,
+                "type" => "Device",
+                "category" => [
+                    "value" => [
+                        $category
+                    ]
+                ],
+                "value" => [
+                    "value" => $Data[0],
+                ],
+                "dateLastValueReported" => [
+                    "type" => "DateTime",
+                    "value" => date("Y-m-d\TH:i:sO", $Data[4]),
+                    "metadata" => new stdClass()
+                ],
+                "controlledProperty" => [
+                    "value" => [
+                        $controlledProperty
+                    ]
+                ],
+                "name" => [
+                    "value" => IPS_GetName($VariableID)
+                ],
+                "description" => [
+                    "value" => IPS_GetObject($VariableID)["ObjectInfo"]
+                ],
+                "source" => [
+                    "value" => "IP-Symcon LoRa Gateway"
+                ],
+                "location" => [
+                    "type" => "geo:json",
+                    "value" => [
+                        "type" => "Point",
+                        "coordinates" => [
+                            $location['longitude'],
+                            $location['latitude']
+                        ]
+                    ],
+                    "metadata" => new stdClass()
+                ],
+                "configuration" => [
+                    "type" => "Symcon",
+                    "value" => [
+                        "profile" => $this->GetVariableProfile($VariableID)
+                    ]
+                ]
+            ];
+        }
+
+		public function SendData($Entities)
+		{
 			$url = $this->ReadPropertyString('Host') . '/v2/op/update';
 			$token = $this->ReadPropertyString('AuthToken');
 
-			$entity = [
-				"id" => "urn:ngsi-ld:Device:Sensor". $VariableID,
-				"type" => "Device",
-				"category" => [
-					"value" => [
-						$category
-					]
-				],
-				"value" => [
-					"value" => $Data[0],
-				],
-				"dateLastValueReported" => [
-					"type" => "DateTime",
-					"value" => date("Y-m-d\TH:i:sO", $Data[4]),
-					"metadata" => new stdClass()
-				],
-				"controlledProperty" => [
-					"value" => [
-						$controlledProperty
-					]
-				],
-				"name" => [
-					"value" => IPS_GetName($VariableID)
-				],
-				"description" => [
-					"value" => IPS_GetObject($VariableID)["ObjectInfo"]
-				],
-				"source" => [
-					"value" => "IP-Symcon LoRa Gateway"
-				],
-				"location" => [
-					"type" => "geo:json",
-					"value" => [
-						"type" => "Point",
-						"coordinates" => [
-							$location['longitude'], 
-							$location['latitude']
-						]
-					],
-					"metadata" => new stdClass()
-				],
-				"configuration" => [
-					"type" => "Symcon",
-					"value" => [
-						"profile" => $this->GetVariableProfile($VariableID)
-					]
-				]
-			];
-			
 			$data = [
 				"actionType" => "append",
-				"entities" => [
-					$entity
-				]
+				"entities" => $Entities
 			];
 
 			$json = json_encode($data);
