@@ -1,8 +1,6 @@
 {
-    "translations":
-    {
-        "de": 
-        {
+    "translations": {
+        "de": {
             "Variables": "Variablen",
             "Variable": "Variable",
             "Category": "Kategorie",
