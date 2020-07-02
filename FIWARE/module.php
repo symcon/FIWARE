@@ -107,6 +107,17 @@ class FIWARE extends IPSModule
         $category = $variable['Category'];
         $controlledProperty = $variable['ControlledProperty'];
 
+        $thresholds = function($thresholds) {
+            $result = [];
+            foreach($thresholds as $threshold) {
+                $result[] = [
+                    'comparison' => $threshold['Comparison'],
+                    'value' => $threshold['Value']
+                ];
+            }
+            return $result;
+        };
+
         return [
             'id'       => 'urn:ngsi-ld:Device:Sensor' . $VariableID,
             'type'     => 'Device',
@@ -151,9 +162,15 @@ class FIWARE extends IPSModule
             'configuration' => [
                 'type'  => 'Symcon',
                 'value' => [
-                    'profile' => $this->GetVariableProfile($VariableID)
-                ]
-            ]
+                    'profile' => $this->GetVariableProfile($VariableID),
+                    'reportingInterval' => 3600,
+                    'thresholds' => [
+                        'invalid' => $thresholds($variable['ThresholdInvalid']),
+                        'warning' => $thresholds($variable['ThresholdWarning']),
+                        'alarm' => $thresholds($variable['ThresholdAlarm'])
+                    ]
+                ],
+            ],
         ];
     }
 

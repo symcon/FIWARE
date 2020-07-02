@@ -19,11 +19,15 @@
                 {
                     "caption": "Category",
                     "name": "Category",
-                    "width": "200px",
+                    "width": "150px",
                     "add": "",
                     "edit": {
                         "type": "Select",
                         "options": [
+                            {
+                                "caption": "Unknown",
+                                "value": ""
+                            },
                             {
                                 "caption": "Sensor",
                                 "value": "sensor"
@@ -75,6 +79,10 @@
                     "edit": {
                         "type": "Select",
                         "options": [
+                            {
+                                "caption": "Unknown",
+                                "value": ""
+                            },
                             {
                                 "caption": "Temperature",
                                 "value": "temperature"
@@ -245,10 +253,184 @@
                 {
                     "caption": "Location",
                     "name": "Location",
-                    "width": "400px",
+                    "width": "150px",
                     "add": 0,
                     "edit": {
                         "type": "SelectLocation"
+                    }
+                },
+                {
+                    "caption": "Threshold (Invalid)",
+                    "name": "ThresholdInvalid",
+                    "width": "170px",
+                    "add": "[]",
+                    "edit": {
+                        "type": "List",
+                        "add": true,
+                        "delete": true,
+                        "rowCount": 3,
+                        "columns": [
+                            {
+                                "caption": "Comparison",
+                                "name": "Comparison",
+                                "width": "125px",
+                                "add": "equal",
+                                "edit": {
+                                    "type": "Select",
+                                    "options": [
+                                        {
+                                            "caption": "Equal (=)",
+                                            "value": "equal"
+                                        },
+                                        {
+                                            "caption": "Not equal (\u2260)",
+                                            "value": "notEqual"
+                                        },
+                                        {
+                                            "caption": "Greater (>)",
+                                            "value": "greaterThan"
+                                        },
+                                        {
+                                            "caption": "Greater or Equal (\u2265)",
+                                            "value": "greaterThanInclusive"
+                                        },
+                                        {
+                                            "caption": "Less (<)",
+                                            "value": "lessThan"
+                                        },
+                                        {
+                                            "caption": "Less or Equal (\u2264)",
+                                            "value": "lessThanInclusive"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "caption": "Value",
+                                "name": "Value",
+                                "width": "125px",
+                                "add": 0,
+                                "edit": {
+                                    "type": "NumberSpinner"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Threshold (Warning)",
+                    "name": "ThresholdWarning",
+                    "width": "180px",
+                    "add": "[]",
+                    "edit": {
+                        "type": "List",
+                        "add": true,
+                        "delete": true,
+                        "rowCount": 3,
+                        "columns": [
+                            {
+                                "caption": "Comparison",
+                                "name": "Comparison",
+                                "width": "125px",
+                                "add": "equal",
+                                "edit": {
+                                    "type": "Select",
+                                    "options": [
+                                        {
+                                            "caption": "Equal (=)",
+                                            "value": "equal"
+                                        },
+                                        {
+                                            "caption": "Not equal (\u2260)",
+                                            "value": "notEqual"
+                                        },
+                                        {
+                                            "caption": "Greater (>)",
+                                            "value": "greaterThan"
+                                        },
+                                        {
+                                            "caption": "Greater or Equal (\u2265)",
+                                            "value": "greaterThanInclusive"
+                                        },
+                                        {
+                                            "caption": "Less (<)",
+                                            "value": "lessThan"
+                                        },
+                                        {
+                                            "caption": "Less or Equal (\u2264)",
+                                            "value": "lessThanInclusive"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "caption": "Value",
+                                "name": "Value",
+                                "width": "125px",
+                                "add": 0,
+                                "edit": {
+                                    "type": "NumberSpinner"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Threshold (Alarm)",
+                    "name": "ThresholdAlarm",
+                    "width": "170px",
+                    "add": "[]",
+                    "edit": {
+                        "type": "List",
+                        "add": true,
+                        "delete": true,
+                        "rowCount": 3,
+                        "columns": [
+                            {
+                                "caption": "Comparison",
+                                "name": "Comparison",
+                                "width": "125px",
+                                "add": "equal",
+                                "edit": {
+                                    "type": "Select",
+                                    "options": [
+                                        {
+                                            "caption": "Equal (=)",
+                                            "value": "equal"
+                                        },
+                                        {
+                                            "caption": "Not equal (\u2260)",
+                                            "value": "notEqual"
+                                        },
+                                        {
+                                            "caption": "Greater (>)",
+                                            "value": "greaterThan"
+                                        },
+                                        {
+                                            "caption": "Greater or Equal (\u2265)",
+                                            "value": "greaterThanInclusive"
+                                        },
+                                        {
+                                            "caption": "Less (<)",
+                                            "value": "lessThan"
+                                        },
+                                        {
+                                            "caption": "Less or Equal (\u2264)",
+                                            "value": "lessThanInclusive"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "caption": "Value",
+                                "name": "Value",
+                                "width": "125px",
+                                "add": 0,
+                                "edit": {
+                                    "type": "NumberSpinner"
+                                }
+                            }
+                        ]
                     }
                 }
             ]
