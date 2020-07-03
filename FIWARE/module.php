@@ -107,12 +107,13 @@ class FIWARE extends IPSModule
         $category = $variable['Category'];
         $controlledProperty = $variable['ControlledProperty'];
 
-        $thresholds = function($thresholds) {
+        $thresholds = function ($thresholds)
+        {
             $result = [];
-            foreach($thresholds as $threshold) {
+            foreach ($thresholds as $threshold) {
                 $result[] = [
                     'comparison' => $threshold['Comparison'],
-                    'value' => $threshold['Value']
+                    'value'      => $threshold['Value']
                 ];
             }
             return $result;
@@ -162,12 +163,12 @@ class FIWARE extends IPSModule
             'configuration' => [
                 'type'  => 'Symcon',
                 'value' => [
-                    'profile' => $this->GetVariableProfile($VariableID),
+                    'profile'           => $this->GetVariableProfile($VariableID),
                     'reportingInterval' => 3600,
-                    'thresholds' => [
+                    'thresholds'        => [
                         'invalid' => $thresholds($variable['ThresholdInvalid']),
                         'warning' => $thresholds($variable['ThresholdWarning']),
-                        'alarm' => $thresholds($variable['ThresholdAlarm'])
+                        'alarm'   => $thresholds($variable['ThresholdAlarm'])
                     ]
                 ],
             ],
