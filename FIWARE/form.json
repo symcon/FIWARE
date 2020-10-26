@@ -254,7 +254,7 @@
                     "caption": "Location",
                     "name": "Location",
                     "width": "150px",
-                    "add": 0,
+                    "add": "{\"latitude\": 0, \"longitude\": 0}",
                     "edit": {
                         "type": "SelectLocation"
                     }
@@ -263,7 +263,7 @@
                     "caption": "Threshold (Invalid)",
                     "name": "ThresholdInvalid",
                     "width": "170px",
-                    "add": "[]",
+                    "add": [],
                     "edit": {
                         "type": "List",
                         "add": true,
@@ -321,7 +321,7 @@
                     "caption": "Threshold (Warning)",
                     "name": "ThresholdWarning",
                     "width": "180px",
-                    "add": "[]",
+                    "add": [],
                     "edit": {
                         "type": "List",
                         "add": true,
@@ -379,7 +379,7 @@
                     "caption": "Threshold (Alarm)",
                     "name": "ThresholdAlarm",
                     "width": "170px",
-                    "add": "[]",
+                    "add": [],
                     "edit": {
                         "type": "List",
                         "add": true,
