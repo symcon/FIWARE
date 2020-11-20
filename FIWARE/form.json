@@ -436,6 +436,33 @@
             ]
         },
         {
+            "type": "List",
+            "name": "WatchMedia",
+            "caption": "Media",
+            "add": true,
+            "delete": true,
+            "columns": [
+                {
+                    "caption": "Media",
+                    "name": "MediaID",
+                    "width": "auto",
+                    "add": 0,
+                    "edit": {
+                        "type": "SelectMedia"
+                    }
+                },
+                {
+                    "caption": "Location",
+                    "name": "Location",
+                    "width": "150px",
+                    "add": "{\"latitude\": 0, \"longitude\": 0}",
+                    "edit": {
+                        "type": "SelectLocation"
+                    }
+                }
+            ]
+        },
+        {
             "type": "ExpansionPanel",
             "name": "ServerSettings",
             "caption": "Server Settings",
@@ -450,6 +477,18 @@
                     "type": "ValidationTextBox",
                     "name": "AuthToken",
                     "caption": "Authentication-Token",
+                    "width": "400px"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "StorageUsername",
+                    "caption": "Storage-Username",
+                    "width": "400px"
+                },
+                {
+                    "type": "PasswordTextBox",
+                    "name": "StoragePassword",
+                    "caption": "Storage-Password",
                     "width": "400px"
                 }
             ]
