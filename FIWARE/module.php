@@ -89,7 +89,7 @@ class FIWARE extends IPSModule
     public function SendVariableData()
     {
         if (IPS_SemaphoreEnter('SendVariablesSemaphore', 0)) {
-            $this->SetTimerInterval('SendVariableTimer', 0);
+            $this->SetTimerInterval('SendVariablesTimer', 0);
             $sendVariables = $this->GetBuffer('SendVariables');
             $this->SetBuffer('SendVariables', '');
             IPS_SemaphoreLeave('SendVariablesSemaphore');
