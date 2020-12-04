@@ -44,7 +44,6 @@ class FIWARE extends IPSModule
         $mediaIDs = json_decode($this->ReadPropertyString('WatchMedia'), true);
         foreach ($mediaIDs as $media) {
             $this->RegisterMessage($media['MediaID'], MM_UPDATE);
-            IPS_LogMessage('FIWARE', $media['MediaID']);
         }
     }
 
