@@ -36,11 +36,20 @@ class FIWARE extends IPSModule
         //Never delete this line!
         parent::ApplyChanges();
 
+        //Delete all registrations in order to readd them
+        foreach ($this->GetMessageList() as $senderID => $messages) {
+            foreach ($messages as $message) {
+                $this->UnregisterMessage($senderID, $message);
+            }
+        }
+
+        //Register variable messages
         $variableIDs = json_decode($this->ReadPropertyString('WatchVariables'), true);
         foreach ($variableIDs as $variable) {
             $this->RegisterMessage($variable['VariableID'], VM_UPDATE);
         }
 
+        //Register media messages
         $mediaIDs = json_decode($this->ReadPropertyString('WatchMedia'), true);
         foreach ($mediaIDs as $media) {
             $this->RegisterMessage($media['MediaID'], MM_UPDATE);
