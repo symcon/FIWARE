@@ -94,28 +94,6 @@ class FIWARE extends IPSModule
         }
     }
 
-    public function SendVariableData()
-    {
-        if (IPS_SemaphoreEnter('SendVariablesSemaphore', 0)) {
-            $this->SetTimerInterval('SendVariablesTimer', 0);
-            $sendVariables = $this->GetBuffer('SendVariables');
-            $this->SetBuffer('SendVariables', '');
-            IPS_SemaphoreLeave('SendVariablesSemaphore');
-            if ($sendVariables != '') {
-                $sendVariablesArray = json_decode($sendVariables, true);
-                $entities = [];
-                foreach ($sendVariablesArray as $update) {
-                    $variableID = $update[0];
-                    $data = $update[1];
-
-                    $this->SendDebug('Sending', 'Sensor: ' . $variableID . ', Value: ' . $data[0] . ', Observed: ' . date('d.m.Y H:i:s', $data[3]), 0);
-                    $entities[] = $this->BuildEntity($variableID, $data);
-                }
-                $this->SendData($entities);
-            }
-        }
-    }
-
     public function SendData($Entities)
     {
         $url = $this->ReadPropertyString('Host') . '/v2/op/update';
@@ -142,6 +120,28 @@ class FIWARE extends IPSModule
         $context = stream_context_create($options);
 
         file_get_contents($url, false, $context);
+    }
+
+    public function SendVariableData()
+    {
+        if (IPS_SemaphoreEnter('SendVariablesSemaphore', 0)) {
+            $this->SetTimerInterval('SendVariablesTimer', 0);
+            $sendVariables = $this->GetBuffer('SendVariables');
+            $this->SetBuffer('SendVariables', '');
+            IPS_SemaphoreLeave('SendVariablesSemaphore');
+            if ($sendVariables != '') {
+                $sendVariablesArray = json_decode($sendVariables, true);
+                $entities = [];
+                foreach ($sendVariablesArray as $update) {
+                    $variableID = $update[0];
+                    $data = $update[1];
+
+                    $this->SendDebug('Sending', 'Sensor: ' . $variableID . ', Value: ' . $data[0] . ', Observed: ' . date('d.m.Y H:i:s', $data[3]), 0);
+                    $entities[] = $this->BuildVariableEntity($variableID, $data);
+                }
+                $this->SendData($entities);
+            }
+        }
     }
 
     public function SendMediaData()
