@@ -20,7 +20,11 @@
             "Greater (>)": "Größer (>)",
             "Greater or Equal (≥)": "Größer oder gleich (≥)",
             "Less (<)": "Kleiner (<)",
-            "Less or Equal (≤)": "Kleiner oder gleich (≤)"
+            "Less or Equal (≤)": "Kleiner oder gleich (≤)",
+            "Building Settings": "Gebäude Einstellungen",
+            "Street": "Straße",
+            "Postcode": "Postleitzahl",
+            "City": "Ort"
         }
     }
 }

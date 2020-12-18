@@ -492,6 +492,41 @@
                     "width": "400px"
                 }
             ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "BuildingSettings",
+            "caption": "Building Settings",
+            "items": [
+                {
+                    "type": "SelectLocation",
+                    "name": "BuildingLocation",
+                    "caption": "Location"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "BuildingStreet",
+                    "caption": "Street",
+                    "width": "300px"
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "BuildingPostcode",
+                            "caption": "Postcode",
+                            "width": "100px"
+                        },
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "BuildingCity",
+                            "caption": "City",
+                            "width": "190px"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

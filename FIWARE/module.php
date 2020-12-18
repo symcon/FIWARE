@@ -11,14 +11,23 @@ class FIWARE extends IPSModule
         //Never delete this line!
         parent::Create();
 
-        //Properties
+        //Watch Properties
         $this->RegisterPropertyString('WatchVariables', '[]');
         $this->RegisterPropertyString('WatchMedia', '[]');
+
+        //Server Properties
         $this->RegisterPropertyString('Host', '');
         $this->RegisterPropertyString('AuthToken', '');
 
+        //Server Storage Properties
         $this->RegisterPropertyString('StorageUsername', '');
         $this->RegisterPropertyString('StoragePassword', '');
+
+        //Building Properties
+        $this->RegisterPropertyString('BuildingLocation', '{"latitude": 0, "longitude": 0}');
+        $this->RegisterPropertyString('BuildingStreet', '');
+        $this->RegisterPropertyString('BuildingPostcode', '');
+        $this->RegisterPropertyString('BuildingCity', '');
 
         //Timer
         $this->RegisterTimer('SendVariablesTimer', 0, 'FW_SendVariableData($_IPS[\'TARGET\']);');
@@ -35,6 +44,9 @@ class FIWARE extends IPSModule
     {
         //Never delete this line!
         parent::ApplyChanges();
+
+        //Register the building
+        $this->RegisterBuilding();
 
         //Delete all registrations in order to readd them
         foreach ($this->GetMessageList() as $senderID => $messages) {
@@ -171,56 +183,36 @@ class FIWARE extends IPSModule
                     $this->SendDebug('Sending', 'Image: ' . $mediaID . ', Observed: ' . date('d.m.Y H:i:s', $data[2]), 0);
 
                     file_put_contents('s3://storage/smarthome/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg', base64_decode(IPS_GetMediaContent($mediaID)));
+
+                    $url = 'https://storage.inspireprojekt.de/smarthome/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg';
+
+                    $this->SendData([$this->BuildMediaEntity($mediaID, $url)]);
                 }
             }
         }
     }
 
-    private function BuildEntity($VariableID, $Data)
+    private function BuildEntity($ObjectID, $Type, $Time, $Location)
     {
-        $variable = $this->GetVariableData($VariableID);
-        $location = json_decode($variable['Location'], true);
-        $category = $variable['Category'];
-        $controlledProperty = $variable['ControlledProperty'];
-
-        $thresholds = function ($thresholds)
-        {
-            $result = [];
-            foreach ($thresholds as $threshold) {
-                $result[] = [
-                    'comparison' => $threshold['Comparison'],
-                    'value'      => $threshold['Value']
-                ];
-            }
-            return $result;
-        };
-
         return [
-            'id'       => 'urn:ngsi-ld:Device:Sensor' . $VariableID,
-            'type'     => 'Device',
-            'category' => [
-                'value' => [
-                    $category
-                ]
-            ],
-            'value' => [
-                'value' => $Data[0],
-            ],
+            'id'                    => 'urn:ngsi-ld:Device:' . $Type . $ObjectID,
+            'type'                  => 'Device',
             'dateLastValueReported' => [
                 'type'     => 'DateTime',
-                'value'    => date("Y-m-d\TH:i:sO", $Data[4]),
+                'value'    => date("Y-m-d\TH:i:sO", $Time),
                 'metadata' => new stdClass()
             ],
-            'controlledProperty' => [
+            'attachedTo' => [
                 'value' => [
-                    $controlledProperty
+                    'attachedToType' => 'Building',
+                    'attachedToId'   => 'urn:ngsi-ld:Building:' . $this->GetBuildingID()
                 ]
             ],
             'name' => [
-                'value' => IPS_GetName($VariableID)
+                'value' => IPS_GetName($ObjectID)
             ],
             'description' => [
-                'value' => IPS_GetObject($VariableID)['ObjectInfo']
+                'value' => IPS_GetObject($ObjectID)['ObjectInfo']
             ],
             'source' => [
                 'value' => 'IP-Symcon LoRa Gateway'
@@ -230,25 +222,24 @@ class FIWARE extends IPSModule
                 'value' => [
                     'type'        => 'Point',
                     'coordinates' => [
-                        $location['longitude'],
-                        $location['latitude']
+                        $Location['longitude'],
+                        $Location['latitude']
                     ]
                 ],
                 'metadata' => new stdClass()
-            ],
-            'configuration' => [
-                'type'  => 'Symcon',
-                'value' => [
-                    'profile'           => $this->GetVariableProfile($VariableID),
-                    'reportingInterval' => 3600,
-                    'thresholds'        => [
-                        'invalid' => $thresholds($variable['ThresholdInvalid']),
-                        'warning' => $thresholds($variable['ThresholdWarning']),
-                        'alarm'   => $thresholds($variable['ThresholdAlarm'])
-                    ]
-                ],
-            ],
+            ]
         ];
+    }
+
+    private function GetBuildingID()
+    {
+        $buildingID = md5('FIWARE' . IPS_GetLicensee());
+
+        return substr($buildingID, 0, 8) . '-' .
+            substr($buildingID, 8, 4) . '-' .
+            substr($buildingID, 12, 4) . '-' .
+            substr($buildingID, 16, 4) . '-' .
+            substr($buildingID, 20, 12);
     }
 
     private function GetVariableProfile($VariableID)
@@ -272,5 +263,130 @@ class FIWARE extends IPSModule
             }
         }
         return null;
+    }
+
+    private function BuildVariableEntity($VariableID, $Data)
+    {
+        $variable = $this->GetVariableData($VariableID);
+        $location = json_decode($variable['Location'], true);
+        $category = $variable['Category'];
+        $controlledProperty = $variable['ControlledProperty'];
+
+        $thresholds = function ($thresholds)
+        {
+            $result = [];
+            foreach ($thresholds as $threshold) {
+                $result[] = [
+                    'comparison' => $threshold['Comparison'],
+                    'value'      => $threshold['Value']
+                ];
+            }
+            return $result;
+        };
+
+        return array_merge($this->BuildEntity($VariableID, 'Sensor', $Data[4], $location), [
+            'category' => [
+                'value' => [
+                    $category
+                ]
+            ],
+            'value' => [
+                'value' => $Data[0],
+            ],
+            'controlledProperty' => [
+                'value' => [
+                    $controlledProperty
+                ]
+            ],
+            'configuration' => [
+                'type'  => 'Symcon',
+                'value' => [
+                    'profile'           => $this->GetVariableProfile($VariableID),
+                    'reportingInterval' => 3600,
+                    'thresholds'        => [
+                        'invalid' => $thresholds($variable['ThresholdInvalid']),
+                        'warning' => $thresholds($variable['ThresholdWarning']),
+                        'alarm'   => $thresholds($variable['ThresholdAlarm'])
+                    ]
+                ],
+            ]
+        ]);
+    }
+
+    private function GetMediaData($MediaID)
+    {
+        $medias = json_decode($this->ReadPropertyString('WatchMedia'), true);
+        foreach ($medias as $media) {
+            if ($media['MediaID'] == $MediaID) {
+                return $media;
+            }
+        }
+        return null;
+    }
+
+    private function BuildMediaEntity($MediaID, $URL)
+    {
+        $media = $this->GetMediaData($MediaID);
+        $location = json_decode($media['Location'], true);
+
+        return array_merge($this->BuildEntity($MediaID, 'Media', time(), $location), [
+            'category' => [
+                'value' => [
+                    'media'
+                ]
+            ],
+            'value' => [
+                'value' => [
+                    'mediaType' => 'IMAGE',
+                    'url'       => $URL
+                ]
+            ],
+            'controlledProperty' => [
+                'value' => [
+                    'camera'
+                ]
+            ]
+        ]);
+    }
+
+    private function RegisterBuilding()
+    {
+        $location = json_decode($this->ReadPropertyString('BuildingLocation'), true);
+
+        $entity = [
+            'id'       => 'urn:ngsi-ld:Building:' . $this->GetBuildingID(),
+            'type'     => 'Building',
+            'category' => [
+                'value' => [
+                    'house'
+                ]
+            ],
+            'description' => [
+                'value' => IPS_GetName(0)
+            ],
+            'source' => [
+                'value' => CC_GetConnectURL(IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}')[0])
+            ],
+            'location' => [
+                'type'  => 'geo:json',
+                'value' => [
+                    'type'        => 'Point',
+                    'coordinates' => [
+                        $location['longitude'],
+                        $location['latitude']
+                    ]
+                ],
+                'metadata' => new stdClass()
+            ],
+            'address' => [
+                'value' => [
+                    'addressLocality' => $this->ReadPropertyString('BuildingCity'),
+                    'postalCode'      => $this->ReadPropertyString('BuildingPostcode'),
+                    'streetAddress'   => $this->ReadPropertyString('BuildingStreet')
+                ]
+            ]
+        ];
+
+        $this->SendData([$entity]);
     }
 }
