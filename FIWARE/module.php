@@ -106,7 +106,7 @@ class FIWARE extends IPSModule
         }
     }
 
-    public function SendData($Entities)
+    public function SendData(array $Entities)
     {
         $url = $this->ReadPropertyString('Host') . '/v2/op/update';
         $token = $this->ReadPropertyString('AuthToken');
