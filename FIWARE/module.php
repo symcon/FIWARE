@@ -226,6 +226,11 @@ class FIWARE extends IPSModule
 
     private function BuildEntity($ObjectID, $Type, $Time, $Location)
     {
+        //Add fallback to building location if object location is not set
+        if ($Location['longitude'] == 0 && $Location['latitude'] == 0) {
+            $Location = json_decode($this->ReadPropertyString('BuildingLocation'), true);
+        }
+
         return [
             'id'                    => 'urn:ngsi-ld:Device:' . $Type . $ObjectID,
             'type'                  => 'Device',
