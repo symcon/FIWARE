@@ -525,6 +525,12 @@
                             "width": "190px"
                         }
                     ]
+                },
+                {
+                    "type": "SelectFile",
+                    "name": "BuildingPlan",
+                    "caption": "Plans (PDF)",
+                    "width": "300px"
                 }
             ]
         }

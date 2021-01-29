@@ -28,6 +28,7 @@ class FIWARE extends IPSModule
         $this->RegisterPropertyString('BuildingStreet', '');
         $this->RegisterPropertyString('BuildingPostcode', '');
         $this->RegisterPropertyString('BuildingCity', '');
+        $this->RegisterPropertyString('BuildingPlan', '');
 
         //Timer
         $this->RegisterTimer('SendVariablesTimer', 0, 'FW_SendVariableData($_IPS[\'TARGET\']);');
@@ -182,14 +183,40 @@ class FIWARE extends IPSModule
 
                     $this->SendDebug('Sending', 'Image: ' . $mediaID . ', Observed: ' . date('d.m.Y H:i:s', $data[2]), 0);
 
-                    file_put_contents('s3://storage/smarthome/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg', base64_decode(IPS_GetMediaContent($mediaID)));
+                    file_put_contents('s3://storage/smarthome/' . $this->GetBuildingID() . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg', base64_decode(IPS_GetMediaContent($mediaID)));
 
-                    $url = 'https://storage.inspireprojekt.de/smarthome/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg';
+                    $url = 'https://storage.inspireprojekt.de/smarthome/' . $this->GetBuildingID() . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg';
 
                     $this->SendData([$this->BuildMediaEntity($mediaID, $url)]);
                 }
             }
         }
+    }
+
+    public function UploadBuildingPlan()
+    {
+        $client = new Aws\S3\S3Client([
+            'version'     => 'latest',
+            'region'      => 'eu-west-1',
+            'credentials' => [
+                'key'    => $this->ReadPropertyString('StorageUsername'),
+                'secret' => $this->ReadPropertyString('StoragePassword'),
+            ],
+            'endpoint' => 'https://inspireprojekt.de'
+        ]);
+        $client->registerStreamWrapper();
+
+        $data = base64_decode($this->ReadPropertyString('BuildingPlan'));
+
+        if (!$data) {
+            return '';
+        }
+
+        $this->SendDebug('Sending', 'Plan: ' . strlen($data) / 1024 . ' kB', 0);
+
+        file_put_contents('s3://storage/smarthome/' . $this->GetBuildingID() . '/plan.pdf', $data);
+
+        return 'https://storage.inspireprojekt.de/smarthome/' . $this->GetBuildingID() . '/plan.pdf';
     }
 
     private function BuildEntity($ObjectID, $Type, $Time, $Location)
@@ -353,6 +380,8 @@ class FIWARE extends IPSModule
     {
         $location = json_decode($this->ReadPropertyString('BuildingLocation'), true);
 
+        $planUrl = $this->UploadBuildingPlan();
+
         $entity = [
             'id'       => 'urn:ngsi-ld:Building:' . $this->GetBuildingID(),
             'type'     => 'Building',
@@ -384,6 +413,9 @@ class FIWARE extends IPSModule
                     'postalCode'      => $this->ReadPropertyString('BuildingPostcode'),
                     'streetAddress'   => $this->ReadPropertyString('BuildingStreet')
                 ]
+            ],
+            'plan' => [
+                'value' => $planUrl
             ]
         ];
 

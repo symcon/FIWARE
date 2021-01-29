@@ -24,7 +24,8 @@
             "Building Settings": "Gebäude Einstellungen",
             "Street": "Straße",
             "Postcode": "Postleitzahl",
-            "City": "Ort"
+            "City": "Ort",
+            "Plans (PDF)": "Pläne (PDF)"
         }
     }
 }
