@@ -25,7 +25,10 @@
             "Street": "Straße",
             "Postcode": "Postleitzahl",
             "City": "Ort",
-            "Plans (PDF)": "Pläne (PDF)"
+            "Plans (PDF)": "Pläne (PDF)",
+            "Sensors": "Sensoren",
+            "Cameras": "Kameras",
+            "Media": "Medien"
         }
     }
 }

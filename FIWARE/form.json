@@ -1,468 +1,6 @@
 {
     "elements": [
         {
-            "type": "List",
-            "name": "WatchVariables",
-            "caption": "Variables",
-            "add": true,
-            "delete": true,
-            "columns": [
-                {
-                    "caption": "Variable",
-                    "name": "VariableID",
-                    "width": "auto",
-                    "add": 0,
-                    "edit": {
-                        "type": "SelectVariable"
-                    }
-                },
-                {
-                    "caption": "Category",
-                    "name": "Category",
-                    "width": "150px",
-                    "add": "",
-                    "edit": {
-                        "type": "Select",
-                        "options": [
-                            {
-                                "caption": "Unknown",
-                                "value": ""
-                            },
-                            {
-                                "caption": "Sensor",
-                                "value": "sensor"
-                            },
-                            {
-                                "caption": "Actuator",
-                                "value": "actuator"
-                            },
-                            {
-                                "caption": "Meter",
-                                "value": "meter"
-                            },
-                            {
-                                "caption": "HVAC",
-                                "value": "HVAC"
-                            },
-                            {
-                                "caption": "Network",
-                                "value": "network"
-                            },
-                            {
-                                "caption": "Multimedia",
-                                "value": "multimedia"
-                            },
-                            {
-                                "caption": "Implement",
-                                "value": "implement"
-                            },
-                            {
-                                "caption": "IrrSystem",
-                                "value": "irrSystem"
-                            },
-                            {
-                                "caption": "IrrSection",
-                                "value": "irrSection"
-                            },
-                            {
-                                "caption": "Endgun",
-                                "value": "endgun"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "caption": "Controlled Property",
-                    "name": "ControlledProperty",
-                    "width": "200px",
-                    "add": "",
-                    "edit": {
-                        "type": "Select",
-                        "options": [
-                            {
-                                "caption": "Unknown",
-                                "value": ""
-                            },
-                            {
-                                "caption": "Temperature",
-                                "value": "temperature"
-                            },
-                            {
-                                "caption": "Humidity",
-                                "value": "humidity"
-                            },
-                            {
-                                "caption": "Light",
-                                "value": "light"
-                            },
-                            {
-                                "caption": "Motion",
-                                "value": "motion"
-                            },
-                            {
-                                "caption": "FillingLevel",
-                                "value": "fillingLevel"
-                            },
-                            {
-                                "caption": "Occupancy",
-                                "value": "occupancy"
-                            },
-                            {
-                                "caption": "Power",
-                                "value": "power"
-                            },
-                            {
-                                "caption": "Pressure",
-                                "value": "pressure"
-                            },
-                            {
-                                "caption": "Smoke",
-                                "value": "smoke"
-                            },
-                            {
-                                "caption": "Energy",
-                                "value": "energy"
-                            },
-                            {
-                                "caption": "AirPollution",
-                                "value": "airPollution"
-                            },
-                            {
-                                "caption": "NoiseLevel",
-                                "value": "noiseLevel"
-                            },
-                            {
-                                "caption": "WeatherConditions",
-                                "value": "weatherConditions"
-                            },
-                            {
-                                "caption": "Precipitation",
-                                "value": "precipitation"
-                            },
-                            {
-                                "caption": "WindSpeed",
-                                "value": "windSpeed"
-                            },
-                            {
-                                "caption": "WindDirection",
-                                "value": "windDirection"
-                            },
-                            {
-                                "caption": "AtmosphericPressure",
-                                "value": "atmosphericPressure"
-                            },
-                            {
-                                "caption": "SolarRadiation",
-                                "value": "solarRadiation"
-                            },
-                            {
-                                "caption": "Depth",
-                                "value": "depth"
-                            },
-                            {
-                                "caption": "PH",
-                                "value": "pH"
-                            },
-                            {
-                                "caption": "Conductivity",
-                                "value": "conductivity"
-                            },
-                            {
-                                "caption": "Conductance",
-                                "value": "conductance"
-                            },
-                            {
-                                "caption": "Tss",
-                                "value": "tss"
-                            },
-                            {
-                                "caption": "Tds",
-                                "value": "tds"
-                            },
-                            {
-                                "caption": "Turbidity",
-                                "value": "turbidity"
-                            },
-                            {
-                                "caption": "Salinity",
-                                "value": "salinity"
-                            },
-                            {
-                                "caption": "Orp",
-                                "value": "orp"
-                            },
-                            {
-                                "caption": "Cdom",
-                                "value": "cdom"
-                            },
-                            {
-                                "caption": "WaterPollution",
-                                "value": "waterPollution"
-                            },
-                            {
-                                "caption": "Location",
-                                "value": "location"
-                            },
-                            {
-                                "caption": "Speed",
-                                "value": "speed"
-                            },
-                            {
-                                "caption": "Heading",
-                                "value": "heading"
-                            },
-                            {
-                                "caption": "Weight",
-                                "value": "weight"
-                            },
-                            {
-                                "caption": "WaterConsumption",
-                                "value": "waterConsumption"
-                            },
-                            {
-                                "caption": "GasComsumption",
-                                "value": "gasComsumption"
-                            },
-                            {
-                                "caption": "ElectricityConsumption",
-                                "value": "electricityConsumption"
-                            },
-                            {
-                                "caption": "SoilMoisture",
-                                "value": "soilMoisture"
-                            },
-                            {
-                                "caption": "TrafficFlow",
-                                "value": "trafficFlow"
-                            },
-                            {
-                                "caption": "EatingActivity",
-                                "value": "eatingActivity"
-                            },
-                            {
-                                "caption": "Milking",
-                                "value": "milking"
-                            },
-                            {
-                                "caption": "MovementActivity",
-                                "value": "movementActivity"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "caption": "Location",
-                    "name": "Location",
-                    "width": "150px",
-                    "add": "{\"latitude\": 0, \"longitude\": 0}",
-                    "edit": {
-                        "type": "SelectLocation"
-                    }
-                },
-                {
-                    "caption": "Threshold (Invalid)",
-                    "name": "ThresholdInvalid",
-                    "width": "170px",
-                    "add": [],
-                    "edit": {
-                        "type": "List",
-                        "add": true,
-                        "delete": true,
-                        "rowCount": 3,
-                        "columns": [
-                            {
-                                "caption": "Comparison",
-                                "name": "Comparison",
-                                "width": "125px",
-                                "add": "equal",
-                                "edit": {
-                                    "type": "Select",
-                                    "options": [
-                                        {
-                                            "caption": "Equal (=)",
-                                            "value": "equal"
-                                        },
-                                        {
-                                            "caption": "Not equal (\u2260)",
-                                            "value": "notEqual"
-                                        },
-                                        {
-                                            "caption": "Greater (>)",
-                                            "value": "greaterThan"
-                                        },
-                                        {
-                                            "caption": "Greater or Equal (\u2265)",
-                                            "value": "greaterThanInclusive"
-                                        },
-                                        {
-                                            "caption": "Less (<)",
-                                            "value": "lessThan"
-                                        },
-                                        {
-                                            "caption": "Less or Equal (\u2264)",
-                                            "value": "lessThanInclusive"
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "caption": "Value",
-                                "name": "Value",
-                                "width": "125px",
-                                "add": 0,
-                                "edit": {
-                                    "type": "NumberSpinner"
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    "caption": "Threshold (Warning)",
-                    "name": "ThresholdWarning",
-                    "width": "180px",
-                    "add": [],
-                    "edit": {
-                        "type": "List",
-                        "add": true,
-                        "delete": true,
-                        "rowCount": 3,
-                        "columns": [
-                            {
-                                "caption": "Comparison",
-                                "name": "Comparison",
-                                "width": "125px",
-                                "add": "equal",
-                                "edit": {
-                                    "type": "Select",
-                                    "options": [
-                                        {
-                                            "caption": "Equal (=)",
-                                            "value": "equal"
-                                        },
-                                        {
-                                            "caption": "Not equal (\u2260)",
-                                            "value": "notEqual"
-                                        },
-                                        {
-                                            "caption": "Greater (>)",
-                                            "value": "greaterThan"
-                                        },
-                                        {
-                                            "caption": "Greater or Equal (\u2265)",
-                                            "value": "greaterThanInclusive"
-                                        },
-                                        {
-                                            "caption": "Less (<)",
-                                            "value": "lessThan"
-                                        },
-                                        {
-                                            "caption": "Less or Equal (\u2264)",
-                                            "value": "lessThanInclusive"
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "caption": "Value",
-                                "name": "Value",
-                                "width": "125px",
-                                "add": 0,
-                                "edit": {
-                                    "type": "NumberSpinner"
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    "caption": "Threshold (Alarm)",
-                    "name": "ThresholdAlarm",
-                    "width": "170px",
-                    "add": [],
-                    "edit": {
-                        "type": "List",
-                        "add": true,
-                        "delete": true,
-                        "rowCount": 3,
-                        "columns": [
-                            {
-                                "caption": "Comparison",
-                                "name": "Comparison",
-                                "width": "125px",
-                                "add": "equal",
-                                "edit": {
-                                    "type": "Select",
-                                    "options": [
-                                        {
-                                            "caption": "Equal (=)",
-                                            "value": "equal"
-                                        },
-                                        {
-                                            "caption": "Not equal (\u2260)",
-                                            "value": "notEqual"
-                                        },
-                                        {
-                                            "caption": "Greater (>)",
-                                            "value": "greaterThan"
-                                        },
-                                        {
-                                            "caption": "Greater or Equal (\u2265)",
-                                            "value": "greaterThanInclusive"
-                                        },
-                                        {
-                                            "caption": "Less (<)",
-                                            "value": "lessThan"
-                                        },
-                                        {
-                                            "caption": "Less or Equal (\u2264)",
-                                            "value": "lessThanInclusive"
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "caption": "Value",
-                                "name": "Value",
-                                "width": "125px",
-                                "add": 0,
-                                "edit": {
-                                    "type": "NumberSpinner"
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        {
-            "type": "List",
-            "name": "WatchMedia",
-            "caption": "Media",
-            "add": true,
-            "delete": true,
-            "columns": [
-                {
-                    "caption": "Media",
-                    "name": "MediaID",
-                    "width": "auto",
-                    "add": 0,
-                    "edit": {
-                        "type": "SelectMedia"
-                    }
-                },
-                {
-                    "caption": "Location",
-                    "name": "Location",
-                    "width": "150px",
-                    "add": "{\"latitude\": 0, \"longitude\": 0}",
-                    "edit": {
-                        "type": "SelectLocation"
-                    }
-                }
-            ]
-        },
-        {
             "type": "ExpansionPanel",
             "name": "ServerSettings",
             "caption": "Server Settings",
@@ -531,6 +69,482 @@
                     "name": "BuildingPlan",
                     "caption": "Plans (PDF)",
                     "width": "300px"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "Sensors",
+            "caption": "Sensors",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "WatchVariables",
+                    "caption": "Variables",
+                    "add": true,
+                    "delete": true,
+                    "columns": [
+                        {
+                            "caption": "Variable",
+                            "name": "VariableID",
+                            "width": "auto",
+                            "add": 0,
+                            "edit": {
+                                "type": "SelectVariable"
+                            }
+                        },
+                        {
+                            "caption": "Category",
+                            "name": "Category",
+                            "width": "150px",
+                            "add": "",
+                            "edit": {
+                                "type": "Select",
+                                "options": [
+                                    {
+                                        "caption": "Unknown",
+                                        "value": ""
+                                    },
+                                    {
+                                        "caption": "Sensor",
+                                        "value": "sensor"
+                                    },
+                                    {
+                                        "caption": "Actuator",
+                                        "value": "actuator"
+                                    },
+                                    {
+                                        "caption": "Meter",
+                                        "value": "meter"
+                                    },
+                                    {
+                                        "caption": "HVAC",
+                                        "value": "HVAC"
+                                    },
+                                    {
+                                        "caption": "Network",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "caption": "Multimedia",
+                                        "value": "multimedia"
+                                    },
+                                    {
+                                        "caption": "Implement",
+                                        "value": "implement"
+                                    },
+                                    {
+                                        "caption": "IrrSystem",
+                                        "value": "irrSystem"
+                                    },
+                                    {
+                                        "caption": "IrrSection",
+                                        "value": "irrSection"
+                                    },
+                                    {
+                                        "caption": "Endgun",
+                                        "value": "endgun"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "caption": "Controlled Property",
+                            "name": "ControlledProperty",
+                            "width": "200px",
+                            "add": "",
+                            "edit": {
+                                "type": "Select",
+                                "options": [
+                                    {
+                                        "caption": "Unknown",
+                                        "value": ""
+                                    },
+                                    {
+                                        "caption": "Temperature",
+                                        "value": "temperature"
+                                    },
+                                    {
+                                        "caption": "Humidity",
+                                        "value": "humidity"
+                                    },
+                                    {
+                                        "caption": "Light",
+                                        "value": "light"
+                                    },
+                                    {
+                                        "caption": "Motion",
+                                        "value": "motion"
+                                    },
+                                    {
+                                        "caption": "FillingLevel",
+                                        "value": "fillingLevel"
+                                    },
+                                    {
+                                        "caption": "Occupancy",
+                                        "value": "occupancy"
+                                    },
+                                    {
+                                        "caption": "Power",
+                                        "value": "power"
+                                    },
+                                    {
+                                        "caption": "Pressure",
+                                        "value": "pressure"
+                                    },
+                                    {
+                                        "caption": "Smoke",
+                                        "value": "smoke"
+                                    },
+                                    {
+                                        "caption": "Energy",
+                                        "value": "energy"
+                                    },
+                                    {
+                                        "caption": "AirPollution",
+                                        "value": "airPollution"
+                                    },
+                                    {
+                                        "caption": "NoiseLevel",
+                                        "value": "noiseLevel"
+                                    },
+                                    {
+                                        "caption": "WeatherConditions",
+                                        "value": "weatherConditions"
+                                    },
+                                    {
+                                        "caption": "Precipitation",
+                                        "value": "precipitation"
+                                    },
+                                    {
+                                        "caption": "WindSpeed",
+                                        "value": "windSpeed"
+                                    },
+                                    {
+                                        "caption": "WindDirection",
+                                        "value": "windDirection"
+                                    },
+                                    {
+                                        "caption": "AtmosphericPressure",
+                                        "value": "atmosphericPressure"
+                                    },
+                                    {
+                                        "caption": "SolarRadiation",
+                                        "value": "solarRadiation"
+                                    },
+                                    {
+                                        "caption": "Depth",
+                                        "value": "depth"
+                                    },
+                                    {
+                                        "caption": "PH",
+                                        "value": "pH"
+                                    },
+                                    {
+                                        "caption": "Conductivity",
+                                        "value": "conductivity"
+                                    },
+                                    {
+                                        "caption": "Conductance",
+                                        "value": "conductance"
+                                    },
+                                    {
+                                        "caption": "Tss",
+                                        "value": "tss"
+                                    },
+                                    {
+                                        "caption": "Tds",
+                                        "value": "tds"
+                                    },
+                                    {
+                                        "caption": "Turbidity",
+                                        "value": "turbidity"
+                                    },
+                                    {
+                                        "caption": "Salinity",
+                                        "value": "salinity"
+                                    },
+                                    {
+                                        "caption": "Orp",
+                                        "value": "orp"
+                                    },
+                                    {
+                                        "caption": "Cdom",
+                                        "value": "cdom"
+                                    },
+                                    {
+                                        "caption": "WaterPollution",
+                                        "value": "waterPollution"
+                                    },
+                                    {
+                                        "caption": "Location",
+                                        "value": "location"
+                                    },
+                                    {
+                                        "caption": "Speed",
+                                        "value": "speed"
+                                    },
+                                    {
+                                        "caption": "Heading",
+                                        "value": "heading"
+                                    },
+                                    {
+                                        "caption": "Weight",
+                                        "value": "weight"
+                                    },
+                                    {
+                                        "caption": "WaterConsumption",
+                                        "value": "waterConsumption"
+                                    },
+                                    {
+                                        "caption": "GasComsumption",
+                                        "value": "gasComsumption"
+                                    },
+                                    {
+                                        "caption": "ElectricityConsumption",
+                                        "value": "electricityConsumption"
+                                    },
+                                    {
+                                        "caption": "SoilMoisture",
+                                        "value": "soilMoisture"
+                                    },
+                                    {
+                                        "caption": "TrafficFlow",
+                                        "value": "trafficFlow"
+                                    },
+                                    {
+                                        "caption": "EatingActivity",
+                                        "value": "eatingActivity"
+                                    },
+                                    {
+                                        "caption": "Milking",
+                                        "value": "milking"
+                                    },
+                                    {
+                                        "caption": "MovementActivity",
+                                        "value": "movementActivity"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "caption": "Location",
+                            "name": "Location",
+                            "width": "150px",
+                            "add": "{\"latitude\": 0, \"longitude\": 0}",
+                            "edit": {
+                                "type": "SelectLocation"
+                            }
+                        },
+                        {
+                            "caption": "Threshold (Invalid)",
+                            "name": "ThresholdInvalid",
+                            "width": "170px",
+                            "add": [],
+                            "edit": {
+                                "type": "List",
+                                "add": true,
+                                "delete": true,
+                                "rowCount": 3,
+                                "columns": [
+                                    {
+                                        "caption": "Comparison",
+                                        "name": "Comparison",
+                                        "width": "125px",
+                                        "add": "equal",
+                                        "edit": {
+                                            "type": "Select",
+                                            "options": [
+                                                {
+                                                    "caption": "Equal (=)",
+                                                    "value": "equal"
+                                                },
+                                                {
+                                                    "caption": "Not equal (\u2260)",
+                                                    "value": "notEqual"
+                                                },
+                                                {
+                                                    "caption": "Greater (>)",
+                                                    "value": "greaterThan"
+                                                },
+                                                {
+                                                    "caption": "Greater or Equal (\u2265)",
+                                                    "value": "greaterThanInclusive"
+                                                },
+                                                {
+                                                    "caption": "Less (<)",
+                                                    "value": "lessThan"
+                                                },
+                                                {
+                                                    "caption": "Less or Equal (\u2264)",
+                                                    "value": "lessThanInclusive"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "caption": "Value",
+                                        "name": "Value",
+                                        "width": "125px",
+                                        "add": 0,
+                                        "edit": {
+                                            "type": "NumberSpinner"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "caption": "Threshold (Warning)",
+                            "name": "ThresholdWarning",
+                            "width": "180px",
+                            "add": [],
+                            "edit": {
+                                "type": "List",
+                                "add": true,
+                                "delete": true,
+                                "rowCount": 3,
+                                "columns": [
+                                    {
+                                        "caption": "Comparison",
+                                        "name": "Comparison",
+                                        "width": "125px",
+                                        "add": "equal",
+                                        "edit": {
+                                            "type": "Select",
+                                            "options": [
+                                                {
+                                                    "caption": "Equal (=)",
+                                                    "value": "equal"
+                                                },
+                                                {
+                                                    "caption": "Not equal (\u2260)",
+                                                    "value": "notEqual"
+                                                },
+                                                {
+                                                    "caption": "Greater (>)",
+                                                    "value": "greaterThan"
+                                                },
+                                                {
+                                                    "caption": "Greater or Equal (\u2265)",
+                                                    "value": "greaterThanInclusive"
+                                                },
+                                                {
+                                                    "caption": "Less (<)",
+                                                    "value": "lessThan"
+                                                },
+                                                {
+                                                    "caption": "Less or Equal (\u2264)",
+                                                    "value": "lessThanInclusive"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "caption": "Value",
+                                        "name": "Value",
+                                        "width": "125px",
+                                        "add": 0,
+                                        "edit": {
+                                            "type": "NumberSpinner"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "caption": "Threshold (Alarm)",
+                            "name": "ThresholdAlarm",
+                            "width": "170px",
+                            "add": [],
+                            "edit": {
+                                "type": "List",
+                                "add": true,
+                                "delete": true,
+                                "rowCount": 3,
+                                "columns": [
+                                    {
+                                        "caption": "Comparison",
+                                        "name": "Comparison",
+                                        "width": "125px",
+                                        "add": "equal",
+                                        "edit": {
+                                            "type": "Select",
+                                            "options": [
+                                                {
+                                                    "caption": "Equal (=)",
+                                                    "value": "equal"
+                                                },
+                                                {
+                                                    "caption": "Not equal (\u2260)",
+                                                    "value": "notEqual"
+                                                },
+                                                {
+                                                    "caption": "Greater (>)",
+                                                    "value": "greaterThan"
+                                                },
+                                                {
+                                                    "caption": "Greater or Equal (\u2265)",
+                                                    "value": "greaterThanInclusive"
+                                                },
+                                                {
+                                                    "caption": "Less (<)",
+                                                    "value": "lessThan"
+                                                },
+                                                {
+                                                    "caption": "Less or Equal (\u2264)",
+                                                    "value": "lessThanInclusive"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "caption": "Value",
+                                        "name": "Value",
+                                        "width": "125px",
+                                        "add": 0,
+                                        "edit": {
+                                            "type": "NumberSpinner"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "Cameras",
+            "caption": "Cameras",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "WatchMedia",
+                    "caption": "Media",
+                    "add": true,
+                    "delete": true,
+                    "columns": [
+                        {
+                            "caption": "Media",
+                            "name": "MediaID",
+                            "width": "auto",
+                            "add": 0,
+                            "edit": {
+                                "type": "SelectMedia"
+                            }
+                        },
+                        {
+                            "caption": "Location",
+                            "name": "Location",
+                            "width": "150px",
+                            "add": "{\"latitude\": 0, \"longitude\": 0}",
+                            "edit": {
+                                "type": "SelectLocation"
+                            }
+                        }
+                    ]
                 }
             ]
         }
