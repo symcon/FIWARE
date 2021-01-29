@@ -28,7 +28,10 @@
             "Plans (PDF)": "Pläne (PDF)",
             "Sensors": "Sensoren",
             "Cameras": "Kameras",
-            "Media": "Medien"
+            "Media": "Medien",
+            "Doors": "Türen",
+            "Windows": "Fenster",
+            "Lights": "Beleuchtung"
         }
     }
 }

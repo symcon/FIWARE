@@ -15,6 +15,11 @@ class FIWARE extends IPSModule
         $this->RegisterPropertyString('WatchVariables', '[]');
         $this->RegisterPropertyString('WatchMedia', '[]');
 
+        //Action Properties
+        $this->RegisterPropertyString('ActionDoors', '[]');
+        $this->RegisterPropertyString('ActionWindows', '[]');
+        $this->RegisterPropertyString('ActionLights', '[]');
+
         //Server Properties
         $this->RegisterPropertyString('Host', '');
         $this->RegisterPropertyString('AuthToken', '');
