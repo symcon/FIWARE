@@ -28,6 +28,9 @@ class FIWARE extends IPSModule
         $this->RegisterPropertyString('StorageUsername', '');
         $this->RegisterPropertyString('StoragePassword', '');
 
+        //Google Maps Elevation Properties
+        $this->RegisterPropertyString('GoogleMapsApiKey', '');
+
         //Building Properties
         $this->RegisterPropertyString('BuildingLocation', '{"latitude": 0, "longitude": 0}');
         $this->RegisterPropertyString('BuildingStreet', '');
@@ -38,6 +41,9 @@ class FIWARE extends IPSModule
         //Timer
         $this->RegisterTimer('SendVariablesTimer', 0, 'FW_SendVariableData($_IPS[\'TARGET\']);');
         $this->RegisterTimer('SendMediaTimer', 0, 'FW_SendMediaData($_IPS[\'TARGET\']);');
+
+        //Cache Elevation value for further use
+        $this->RegisterAttributeFloat('BuildingElevation', 0);
     }
 
     public function Destroy()
@@ -53,6 +59,9 @@ class FIWARE extends IPSModule
 
         //Register the building
         $this->RegisterBuilding();
+
+        //Update Building Elevation using Google Maps
+        $this->UpdateBuildingElevation();
 
         //Delete all registrations in order to readd them
         foreach ($this->GetMessageList() as $senderID => $messages) {
@@ -72,6 +81,23 @@ class FIWARE extends IPSModule
         foreach ($mediaIDs as $media) {
             $this->RegisterMessage($media['MediaID'], MM_UPDATE);
         }
+    }
+
+    public function GetConfigurationForm()
+    {
+        $data = json_decode(file_get_contents(__DIR__ . '/form.json'));
+
+        $elevation = $this->ReadAttributeFloat('BuildingElevation');
+
+        if ($elevation == 0) {
+            $elevation = $this->Translate('Unknown');
+        } else {
+            $elevation = number_format($elevation, 2, ',', '') . 'm';
+        }
+
+        $data->actions[0]->caption = sprintf($this->Translate('Elevation: %s'), $elevation);
+
+        return json_encode($data);
     }
 
     public function MessageSink($Timestamp, $SenderID, $MessageID, $Data)
@@ -430,5 +456,20 @@ class FIWARE extends IPSModule
         ];
 
         $this->SendData([$entity]);
+    }
+
+    private function UpdateBuildingElevation()
+    {
+        $location = json_decode($this->ReadPropertyString('BuildingLocation'), true);
+
+        $url = 'https://maps.googleapis.com/maps/api/elevation/json?locations=%s,%s&key=%s';
+
+        $results = json_decode(file_get_contents(sprintf($url, number_format($location['latitude'], 7), number_format($location['longitude'], 7), $this->ReadPropertyString('GoogleMapsApiKey'))), true);
+
+        $this->SendDebug('Elevation', json_encode($results), 0);
+
+        if ($results['status'] == 'OK') {
+            $this->WriteAttributeFloat('BuildingElevation', $results['results'][0]['elevation']);
+        }
     }
 }

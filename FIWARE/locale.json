@@ -9,6 +9,7 @@
             "Server Settings": "Server Einstellungen",
             "Host": "Host",
             "Authentication-Token": "Authentifizierungs-Token",
+            "Google Maps API-Key": "Google Maps API-Key",
             "Unknown": "Unbekannt",
             "Comparison": "Vergleich",
             "Value": "Wert",
@@ -63,7 +64,8 @@
             "Depth": "Tiefe",
             "PH": "PH-Wert",
             "Conductivity": "Leistungsfähigkeit",
-            "Conductance": "Leitfähigkeit"
+            "Conductance": "Leitfähigkeit",
+            "Elevation: %s": "Höhe über NN: %s"
         }
     }
 }

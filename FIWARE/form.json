@@ -28,6 +28,12 @@
                     "name": "StoragePassword",
                     "caption": "Storage-Password",
                     "width": "400px"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "GoogleMapsApiKey",
+                    "caption": "Google Maps API-Key",
+                    "width": "400px"
                 }
             ]
         },
@@ -649,6 +655,12 @@
                     ]
                 }
             ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Label",
+            "caption": ""
         }
     ]
 }
