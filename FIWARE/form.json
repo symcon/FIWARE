@@ -134,11 +134,11 @@
                                         "value": "implement"
                                     },
                                     {
-                                        "caption": "IrrSystem",
+                                        "caption": "Irrigation System",
                                         "value": "irrSystem"
                                     },
                                     {
-                                        "caption": "IrrSection",
+                                        "caption": "Irrigation Section",
                                         "value": "irrSection"
                                     },
                                     {
@@ -177,7 +177,7 @@
                                         "value": "motion"
                                     },
                                     {
-                                        "caption": "FillingLevel",
+                                        "caption": "Filling Level",
                                         "value": "fillingLevel"
                                     },
                                     {
@@ -201,15 +201,15 @@
                                         "value": "energy"
                                     },
                                     {
-                                        "caption": "AirPollution",
+                                        "caption": "Air Pollution",
                                         "value": "airPollution"
                                     },
                                     {
-                                        "caption": "NoiseLevel",
+                                        "caption": "Noise Level",
                                         "value": "noiseLevel"
                                     },
                                     {
-                                        "caption": "WeatherConditions",
+                                        "caption": "Weather Conditions",
                                         "value": "weatherConditions"
                                     },
                                     {
@@ -217,19 +217,19 @@
                                         "value": "precipitation"
                                     },
                                     {
-                                        "caption": "WindSpeed",
+                                        "caption": "Wind Speed",
                                         "value": "windSpeed"
                                     },
                                     {
-                                        "caption": "WindDirection",
+                                        "caption": "Wind Direction",
                                         "value": "windDirection"
                                     },
                                     {
-                                        "caption": "AtmosphericPressure",
+                                        "caption": "Atmospheric Pressure",
                                         "value": "atmosphericPressure"
                                     },
                                     {
-                                        "caption": "SolarRadiation",
+                                        "caption": "Solar Radiation",
                                         "value": "solarRadiation"
                                     },
                                     {
@@ -273,7 +273,7 @@
                                         "value": "cdom"
                                     },
                                     {
-                                        "caption": "WaterPollution",
+                                        "caption": "Water Pollution",
                                         "value": "waterPollution"
                                     },
                                     {
@@ -293,27 +293,27 @@
                                         "value": "weight"
                                     },
                                     {
-                                        "caption": "WaterConsumption",
+                                        "caption": "Water Consumption",
                                         "value": "waterConsumption"
                                     },
                                     {
-                                        "caption": "GasComsumption",
+                                        "caption": "Gas Comsumption",
                                         "value": "gasComsumption"
                                     },
                                     {
-                                        "caption": "ElectricityConsumption",
+                                        "caption": "Electricity Consumption",
                                         "value": "electricityConsumption"
                                     },
                                     {
-                                        "caption": "SoilMoisture",
+                                        "caption": "Soil Moisture",
                                         "value": "soilMoisture"
                                     },
                                     {
-                                        "caption": "TrafficFlow",
+                                        "caption": "Traffic Flow",
                                         "value": "trafficFlow"
                                     },
                                     {
-                                        "caption": "EatingActivity",
+                                        "caption": "Eating Activity",
                                         "value": "eatingActivity"
                                     },
                                     {
@@ -321,7 +321,7 @@
                                         "value": "milking"
                                     },
                                     {
-                                        "caption": "MovementActivity",
+                                        "caption": "Movement Activity",
                                         "value": "movementActivity"
                                     }
                                 ]
