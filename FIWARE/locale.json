@@ -65,7 +65,13 @@
             "PH": "PH-Wert",
             "Conductivity": "Leistungsfähigkeit",
             "Conductance": "Leitfähigkeit",
-            "Elevation: %s": "Höhe über NN: %s"
+            "Elevation: %s": "Höhe über NN: %s",
+            "Access Privileges": "Zugriffsrechte",
+            "Full Access": "Vollzugriff",
+            "Actuators": "Aktoren",
+            "Who?": "Wer?",
+            "Valid until": "Gültig bis",
+            "Scope": "Scope"
         }
     }
 }

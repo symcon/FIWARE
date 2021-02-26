@@ -659,6 +659,64 @@
     ],
     "actions": [
         {
+            "type": "ExpansionPanel",
+            "name": "AccessList",
+            "caption": "Access Privileges",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "AccessList",
+                    "caption": "",
+                    "add": true,
+                    "delete": true,
+                    "onAdd": "$valid = json_decode($AccessList['ValidUntil']); $valid_until = mktime($valid->hour, $valid->minute, $valid->second, $valid->month, $valid->day, $valid->year); FW_AddAccessPrivilege($id, $AccessList['Requester'], $AccessList['Scope'], $valid_until);",
+                    "onEdit": "$valid = json_decode($AccessList['ValidUntil']); $valid_until = mktime($valid->hour, $valid->minute, $valid->second, $valid->month, $valid->day, $valid->year); FW_UpdateAccessPrivilege($id, $AccessList['Token'], $AccessList['Requester'], $AccessList['Scope'], $valid_until);",
+                    "onDelete": "FW_DeleteAccessPrivilege($id, $AccessList['Token']);",
+                    "columns": [
+                        {
+                            "caption": "Token",
+                            "name": "Token",
+                            "width": "0px",
+                            "add": "",
+                            "visible": false
+                        },
+                        {
+                            "caption": "Who?",
+                            "name": "Requester",
+                            "width": "auto",
+                            "add": "",
+                            "edit": {
+                                "type": "ValidationTextBox"
+                            }
+                        },
+                        {
+                            "caption": "Scope",
+                            "name": "Scope",
+                            "width": "150px",
+                            "add": "*",
+                            "edit": {
+                                "type": "Select",
+                                "options": [
+                                    { "caption": "Full Access", "value": "*" },
+                                    { "caption": "Sensors", "value": "sensors" },
+                                    { "caption": "Actuators", "value": "actuators" }
+                                ]
+                            }
+                        },
+                        {
+                            "caption": "Valid until",
+                            "name": "ValidUntil",
+                            "width": "200px",
+                            "add": "{\"day\": 0, \"month\": 0, \"year\": 0, \"hour\": 0, \"minute\": 0, \"second\": 0}",
+                            "edit": {
+                                "type": "SelectDateTime"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "type": "Label",
             "caption": ""
         }
