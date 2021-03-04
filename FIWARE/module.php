@@ -46,7 +46,7 @@ class FIWARE extends IPSModule
         $this->RegisterAttributeFloat('BuildingElevation', 0);
 
         //Access Privileges
-        $this->RegisterAttributeString("AccessPrivileges", "[]");
+        $this->RegisterAttributeString('AccessPrivileges', '[]');
     }
 
     public function Destroy()
@@ -100,15 +100,15 @@ class FIWARE extends IPSModule
 
         $data->actions[1]->caption = sprintf($this->Translate('Elevation: %s'), $elevation);
 
-        $accessPrivilege = json_decode($this->ReadAttributeString("AccessPrivileges"), true);
+        $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
         foreach ($accessPrivilege as $key => $value) {
-            $accessPrivilege[$key]["ValidUntil"] = json_encode([
-                "hour" => intval(date("H", $value["ValidUntil"])),
-                "minute" => intval(date("i", $value["ValidUntil"])),
-                "second" => intval(date("s", $value["ValidUntil"])),
-                "day" => intval(date("d", $value["ValidUntil"])),
-                "month" => intval(date("m", $value["ValidUntil"])),
-                "year" => intval(date("Y", $value["ValidUntil"]))
+            $accessPrivilege[$key]['ValidUntil'] = json_encode([
+                'hour'   => intval(date('H', $value['ValidUntil'])),
+                'minute' => intval(date('i', $value['ValidUntil'])),
+                'second' => intval(date('s', $value['ValidUntil'])),
+                'day'    => intval(date('d', $value['ValidUntil'])),
+                'month'  => intval(date('m', $value['ValidUntil'])),
+                'year'   => intval(date('Y', $value['ValidUntil']))
             ]);
         }
 
@@ -265,6 +265,48 @@ class FIWARE extends IPSModule
         file_put_contents('s3://storage/smarthome/' . $this->GetBuildingID() . '/plan.pdf', $data);
 
         return 'https://storage.inspireprojekt.de/smarthome/' . $this->GetBuildingID() . '/plan.pdf';
+    }
+
+    public function AddAccessPrivilege(string $Requester, string $Scope, int $ValidUntil)
+    {
+        $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
+
+        $accessPrivilege[] = [
+            'Token'      => bin2hex(random_bytes(32)),
+            'Requester'  => $Requester,
+            'Scope'      => $Scope,
+            'ValidUntil' => $ValidUntil
+        ];
+
+        $this->WriteAttributeString('AccessPrivileges', json_encode($accessPrivilege));
+    }
+
+    public function UpdateAccessPrivilege(string $Token, string $Requester, string $Scope, int $ValidUntil)
+    {
+        $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
+
+        foreach ($accessPrivilege as $key => $value) {
+            if ($value['Token'] == $Token) {
+                $accessPrivilege[$key]['Requester'] = $Requester;
+                $accessPrivilege[$key]['Scope'] = $Scope;
+                $accessPrivilege[$key]['ValidUntil'] = $ValidUntil;
+            }
+        }
+
+        $this->WriteAttributeString('AccessPrivileges', json_encode($accessPrivilege));
+    }
+
+    public function DeleteAccessPrivilege(string $Token)
+    {
+        $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
+
+        foreach ($accessPrivilege as $key => $value) {
+            if ($value['Token'] == $Token) {
+                unset($accessPrivilege[$key]);
+            }
+        }
+
+        $this->WriteAttributeString('AccessPrivileges', json_encode($accessPrivilege));
     }
 
     private function BuildEntity($ObjectID, $Type, $Time, $Location)
@@ -488,44 +530,5 @@ class FIWARE extends IPSModule
         if ($results['status'] == 'OK') {
             $this->WriteAttributeFloat('BuildingElevation', $results['results'][0]['elevation']);
         }
-    }
-
-    public function AddAccessPrivilege(string $Requester, string $Scope, int $ValidUntil) {
-        $accessPrivilege = json_decode($this->ReadAttributeString("AccessPrivileges"), true);
-
-        $accessPrivilege[] = [
-            "Token" => bin2hex(random_bytes(32)),
-            "Requester" => $Requester,
-            "Scope" => $Scope,
-            "ValidUntil" => $ValidUntil
-        ];
-
-        $this->WriteAttributeString("AccessPrivileges", json_encode($accessPrivilege));
-    }
-
-    public function UpdateAccessPrivilege(string $Token, string $Requester, string $Scope, int $ValidUntil) {
-        $accessPrivilege = json_decode($this->ReadAttributeString("AccessPrivileges"), true);
-
-        foreach($accessPrivilege as $key => $value) {
-            if($value["Token"] == $Token) {
-                $accessPrivilege[$key]["Requester"] = $Requester;
-                $accessPrivilege[$key]["Scope"] = $Scope;
-                $accessPrivilege[$key]["ValidUntil"] = $ValidUntil;
-            }
-        }
-
-        $this->WriteAttributeString("AccessPrivileges", json_encode($accessPrivilege));
-    }
-
-    public function DeleteAccessPrivilege(string $Token) {
-        $accessPrivilege = json_decode($this->ReadAttributeString("AccessPrivileges"), true);
-
-        foreach($accessPrivilege as $key => $value) {
-            if($value["Token"] == $Token) {
-                unset($accessPrivilege[$key]);
-            }
-        }
-
-        $this->WriteAttributeString("AccessPrivileges", json_encode($accessPrivilege));
     }
 }
