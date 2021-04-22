@@ -33,6 +33,7 @@
             "Doors": "Türen",
             "Windows": "Fenster",
             "Lights": "Beleuchtung",
+            "Shutters": "Rollladen",
             "Sensor": "Sensor",
             "Actuator": "Aktor",
             "Meter": "Messstelle",

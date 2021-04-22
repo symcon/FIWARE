@@ -556,6 +556,74 @@
         },
         {
             "type": "ExpansionPanel",
+            "name": "Lights",
+            "caption": "Lights",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "ActionLights",
+                    "caption": "Variables",
+                    "add": true,
+                    "delete": true,
+                    "columns": [
+                        {
+                            "caption": "Variable",
+                            "name": "VariableID",
+                            "width": "auto",
+                            "add": 0,
+                            "edit": {
+                                "type": "SelectVariable"
+                            }
+                        },
+                        {
+                            "caption": "Location",
+                            "name": "Location",
+                            "width": "150px",
+                            "add": "{\"latitude\": 0, \"longitude\": 0}",
+                            "edit": {
+                                "type": "SelectLocation"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "Shutters",
+            "caption": "Shutters",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "ActionShutters",
+                    "caption": "Variables",
+                    "add": true,
+                    "delete": true,
+                    "columns": [
+                        {
+                            "caption": "Variable",
+                            "name": "VariableID",
+                            "width": "auto",
+                            "add": 0,
+                            "edit": {
+                                "type": "SelectVariable"
+                            }
+                        },
+                        {
+                            "caption": "Location",
+                            "name": "Location",
+                            "width": "150px",
+                            "add": "{\"latitude\": 0, \"longitude\": 0}",
+                            "edit": {
+                                "type": "SelectLocation"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
             "name": "Doors",
             "caption": "Doors",
             "items": [
@@ -596,40 +664,6 @@
                 {
                     "type": "List",
                     "name": "ActionWindows",
-                    "caption": "Variables",
-                    "add": true,
-                    "delete": true,
-                    "columns": [
-                        {
-                            "caption": "Variable",
-                            "name": "VariableID",
-                            "width": "auto",
-                            "add": 0,
-                            "edit": {
-                                "type": "SelectVariable"
-                            }
-                        },
-                        {
-                            "caption": "Location",
-                            "name": "Location",
-                            "width": "150px",
-                            "add": "{\"latitude\": 0, \"longitude\": 0}",
-                            "edit": {
-                                "type": "SelectLocation"
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "type": "ExpansionPanel",
-            "name": "Lights",
-            "caption": "Lights",
-            "items": [
-                {
-                    "type": "List",
-                    "name": "ActionLights",
                     "caption": "Variables",
                     "add": true,
                     "delete": true,

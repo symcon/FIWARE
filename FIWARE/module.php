@@ -16,9 +16,10 @@ class FIWARE extends IPSModule
         $this->RegisterPropertyString('WatchMedia', '[]');
 
         //Action Properties
+        $this->RegisterPropertyString('ActionLights', '[]');
+        $this->RegisterPropertyString('ActionShutters', '[]');
         $this->RegisterPropertyString('ActionDoors', '[]');
         $this->RegisterPropertyString('ActionWindows', '[]');
-        $this->RegisterPropertyString('ActionLights', '[]');
 
         //Server Properties
         $this->RegisterPropertyString('Host', '');
@@ -66,7 +67,7 @@ class FIWARE extends IPSModule
         //Update Building Elevation using Google Maps
         $this->UpdateBuildingElevation();
 
-        //Delete all registrations in order to readd them
+        //Delete all registrations in order to read them
         foreach ($this->GetMessageList() as $senderID => $messages) {
             foreach ($messages as $message) {
                 $this->UnregisterMessage($senderID, $message);
@@ -75,6 +76,22 @@ class FIWARE extends IPSModule
 
         //Register variable messages
         $variableIDs = json_decode($this->ReadPropertyString('WatchVariables'), true);
+        foreach ($variableIDs as $variable) {
+            $this->RegisterMessage($variable['VariableID'], VM_UPDATE);
+        }
+        $variableIDs = json_decode($this->ReadPropertyString('ActionLights'), true);
+        foreach ($variableIDs as $variable) {
+            $this->RegisterMessage($variable['VariableID'], VM_UPDATE);
+        }
+        $variableIDs = json_decode($this->ReadPropertyString('ActionShutters'), true);
+        foreach ($variableIDs as $variable) {
+            $this->RegisterMessage($variable['VariableID'], VM_UPDATE);
+        }
+        $variableIDs = json_decode($this->ReadPropertyString('ActionDoors'), true);
+        foreach ($variableIDs as $variable) {
+            $this->RegisterMessage($variable['VariableID'], VM_UPDATE);
+        }
+        $variableIDs = json_decode($this->ReadPropertyString('ActionWindows'), true);
         foreach ($variableIDs as $variable) {
             $this->RegisterMessage($variable['VariableID'], VM_UPDATE);
         }
@@ -122,7 +139,7 @@ class FIWARE extends IPSModule
         switch ($MessageID) {
             case VM_UPDATE:
             {
-                $this->SendDebug('Collecting', 'Sensor: ' . $SenderID . ', Value: ' . $Data[0] . ', Observed: ' . date('d.m.Y H:i:s', $Data[3]), 0);
+                $this->SendDebug('Collecting', 'Variable: ' . $SenderID . ', Value: ' . $Data[0] . ', Observed: ' . date('d.m.Y H:i:s', $Data[3]), 0);
 
                 if (IPS_SemaphoreEnter('SendVariablesSemaphore', 500)) {
                     $sendVariablesString = $this->GetBuffer('SendVariables');
@@ -197,8 +214,17 @@ class FIWARE extends IPSModule
                     $variableID = $update[0];
                     $data = $update[1];
 
-                    $this->SendDebug('Sending', 'Sensor: ' . $variableID . ', Value: ' . $data[0] . ', Observed: ' . date('d.m.Y H:i:s', $data[3]), 0);
-                    $entities[] = $this->BuildVariableEntity($variableID, $data);
+                    $variable = $this->GetVariableData($variableID);
+                    switch ($variable['Category']) {
+                        case 'actuator':
+                            $this->SendDebug('Sending', 'Actuator: ' . $variableID . ', Value: ' . $data[0] . ', Observed: ' . date('d.m.Y H:i:s', $data[3]), 0);
+                            $entities[] = $this->BuildActuatorEntity($variableID, $data);
+                            break;
+                        default:
+                            $this->SendDebug('Sending', 'Sensor: ' . $variableID . ', Value: ' . $data[0] . ', Observed: ' . date('d.m.Y H:i:s', $data[3]), 0);
+                            $entities[] = $this->BuildSensorEntity($variableID, $data);
+                            break;
+                    }
                 }
                 $this->SendData($entities);
             }
@@ -384,10 +410,42 @@ class FIWARE extends IPSModule
                 return $variable;
             }
         }
+        $variables = json_decode($this->ReadPropertyString('ActionLights'), true);
+        foreach ($variables as $variable) {
+            if ($variable['VariableID'] == $VariableID) {
+                $variable['Category'] = 'actuator';
+                $variable['ControlledProperty'] = 'light';
+                return $variable;
+            }
+        }
+        $variables = json_decode($this->ReadPropertyString('ActionShutters'), true);
+        foreach ($variables as $variable) {
+            if ($variable['VariableID'] == $VariableID) {
+                $variable['Category'] = 'actuator';
+                $variable['ControlledProperty'] = 'shutter';
+                return $variable;
+            }
+        }
+        $variables = json_decode($this->ReadPropertyString('ActionDoors'), true);
+        foreach ($variables as $variable) {
+            if ($variable['VariableID'] == $VariableID) {
+                $variable['Category'] = 'actuator';
+                $variable['ControlledProperty'] = 'door';
+                return $variable;
+            }
+        }
+        $variables = json_decode($this->ReadPropertyString('ActionWindows'), true);
+        foreach ($variables as $variable) {
+            if ($variable['VariableID'] == $VariableID) {
+                $variable['Category'] = 'actuator';
+                $variable['ControlledProperty'] = 'window';
+                return $variable;
+            }
+        }
         return null;
     }
 
-    private function BuildVariableEntity($VariableID, $Data)
+    private function BuildSensorEntity($VariableID, $Data)
     {
         $variable = $this->GetVariableData($VariableID);
         $location = json_decode($variable['Location'], true);
@@ -430,6 +488,45 @@ class FIWARE extends IPSModule
                         'warning' => $thresholds($variable['ThresholdWarning']),
                         'alarm'   => $thresholds($variable['ThresholdAlarm'])
                     ]
+                ],
+            ]
+        ]);
+    }
+
+    private function BuildActuatorEntity($VariableID, $Data)
+    {
+        $variable = $this->GetVariableData($VariableID);
+        $location = json_decode($variable['Location'], true);
+        $category = $variable['Category'];
+        $controlledProperty = $variable['ControlledProperty'];
+
+        // Map boolean values to string representation
+        if (is_bool($Data[0])) {
+            $Data[0] = $Data[0] ? 'OPEN' : 'CLOSED';
+        }
+        // Otherwise reduce to percentage value if profile is set
+        else {
+            // ToDo: Implement this
+        }
+
+        return array_merge($this->BuildEntity($VariableID, 'Actuator', $Data[4], $location), [
+            'category' => [
+                'value' => [
+                    $category
+                ]
+            ],
+            'value' => [
+                'value' => $Data[0]
+            ],
+            'controlledProperty' => [
+                'value' => [
+                    $controlledProperty
+                ]
+            ],
+            'configuration' => [
+                'type'  => 'Symcon',
+                'value' => [
+                    'profile' => $this->GetVariableProfile($VariableID)
                 ],
             ]
         ]);
