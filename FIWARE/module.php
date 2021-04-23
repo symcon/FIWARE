@@ -502,6 +502,11 @@ class FIWARE extends IPSModule
 
         // Map boolean values for door/window to string representation
         switch ($controlledProperty) {
+            case 'light':
+            case 'shutter':
+                // FIXME: We might need to convert to percentage value
+                $Data[0] = intval($Data[0]);
+                break;
             case 'door':
             case 'window':
                 $Data[0] = $Data[0] ? 'OPEN' : 'CLOSED';
