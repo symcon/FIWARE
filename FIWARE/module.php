@@ -500,13 +500,12 @@ class FIWARE extends IPSModule
         $category = $variable['Category'];
         $controlledProperty = $variable['ControlledProperty'];
 
-        // Map boolean values to string representation
-        if (is_bool($Data[0])) {
-            $Data[0] = $Data[0] ? 'OPEN' : 'CLOSED';
-        }
-        // Otherwise reduce to percentage value if profile is set
-        else {
-            // ToDo: Implement this
+        // Map boolean values for door/window to string representation
+        switch ($controlledProperty) {
+            case 'door':
+            case 'window':
+                $Data[0] = $Data[0] ? 'OPEN' : 'CLOSED';
+                break;
         }
 
         return array_merge($this->BuildEntity($VariableID, 'Actuator', $Data[4], $location), [
