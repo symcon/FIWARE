@@ -504,8 +504,11 @@ class FIWARE extends IPSModule
         switch ($controlledProperty) {
             case 'light':
             case 'shutter':
-                // FIXME: We might need to convert to percentage value
-                $Data[0] = intval($Data[0]);
+                if (is_bool($Data[0])) {
+                    $Data[0] = $Data[0] ? 100 : 0;
+                } else {
+                    // FIXME: We might need to convert to percentage value
+                }
                 break;
             case 'door':
             case 'window':
