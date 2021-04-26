@@ -613,7 +613,7 @@ class FIWARE extends IPSModule
                     'streetAddress'   => $this->ReadPropertyString('BuildingStreet')
                 ]
             ],
-            'plan' => [
+            'floorPlan' => [
                 'value' => $planUrl
             ]
         ];
