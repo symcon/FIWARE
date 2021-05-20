@@ -454,8 +454,8 @@ class FIWARE extends IPSModule
         $value = $Data[0];
 
         // Map boolean values to 0/1 to better support thresholds
-        if (is_bool($Data[0])) {
-            $Data[0] = $Data[0] ? 1 : 0;
+        if (is_bool($value)) {
+            $value = $value ? 1 : 0;
         }
 
         $thresholds = function ($thresholds)
