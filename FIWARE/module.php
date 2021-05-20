@@ -451,6 +451,12 @@ class FIWARE extends IPSModule
         $location = json_decode($variable['Location'], true);
         $category = $variable['Category'];
         $controlledProperty = $variable['ControlledProperty'];
+        $value = $Data[0];
+
+        // Map boolean values to 0/1 to better support thresholds
+        if (is_bool($Data[0])) {
+            $Data[0] = $Data[0] ? 1 : 0;
+        }
 
         $thresholds = function ($thresholds)
         {
@@ -471,7 +477,7 @@ class FIWARE extends IPSModule
                 ]
             ],
             'value' => [
-                'value' => $Data[0],
+                'value' => $value,
             ],
             'controlledProperty' => [
                 'value' => [
