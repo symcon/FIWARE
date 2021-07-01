@@ -28,6 +28,8 @@ class FIWARE extends IPSModule
         //Server Storage Properties
         $this->RegisterPropertyString('StorageUsername', '');
         $this->RegisterPropertyString('StoragePassword', '');
+        $this->RegisterPropertyString('StorageBucket', '');
+        $this->RegisterPropertyString('StorageEndpoint', '');
 
         //Google Maps Elevation Properties
         $this->RegisterPropertyString('GoogleMapsApiKey', '');
@@ -62,10 +64,10 @@ class FIWARE extends IPSModule
         parent::ApplyChanges();
 
         //Register the building
-        $this->RegisterBuilding();
+        //$this->RegisterBuilding();
 
         //Update Building Elevation using Google Maps
-        $this->UpdateBuildingElevation();
+        //$this->UpdateBuildingElevation();
 
         //Delete all registrations in order to read them
         foreach ($this->GetMessageList() as $senderID => $messages) {
@@ -107,6 +109,18 @@ class FIWARE extends IPSModule
     {
         $data = json_decode(file_get_contents(__DIR__ . '/form.json'));
 
+        if (!$this->ReadPropertyString("Host")) {
+            foreach($data->elements as $element) {
+                $element->visible = false;
+            }
+            foreach($data->actions as $action) {
+                $action->visible = false;
+            }
+            $data->actions[0]->visible = true;
+            $data->actions[1]->visible = true;
+            $data->actions[2]->visible = true;
+        }
+        
         $elevation = $this->ReadAttributeFloat('BuildingElevation');
 
         if ($elevation == 0) {
@@ -115,7 +129,7 @@ class FIWARE extends IPSModule
             $elevation = number_format($elevation, 2, ',', '') . 'm';
         }
 
-        $data->actions[1]->caption = sprintf($this->Translate('Elevation: %s'), $elevation);
+        $data->actions[6]->caption = sprintf($this->Translate('Elevation: %s'), $elevation);
 
         $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
         foreach ($accessPrivilege as $key => $value) {
@@ -129,7 +143,7 @@ class FIWARE extends IPSModule
             ]);
         }
 
-        $data->actions[0]->items[0]->values = $accessPrivilege;
+        $data->actions[5]->items[0]->values = $accessPrivilege;
 
         return json_encode($data);
     }
@@ -246,7 +260,7 @@ class FIWARE extends IPSModule
                         'key'    => $this->ReadPropertyString('StorageUsername'),
                         'secret' => $this->ReadPropertyString('StoragePassword'),
                     ],
-                    'endpoint' => 'https://inspireprojekt.de'
+                    'endpoint' => $this->ReadPropertyString('StorageEndpoint')
                 ]);
                 $client->registerStreamWrapper();
 
@@ -257,9 +271,9 @@ class FIWARE extends IPSModule
 
                     $this->SendDebug('Sending', 'Image: ' . $mediaID . ', Observed: ' . date('d.m.Y H:i:s', $data[2]), 0);
 
-                    file_put_contents('s3://storage/smarthome/' . $this->GetBuildingID() . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg', base64_decode(IPS_GetMediaContent($mediaID)));
+                    file_put_contents('s3://storage/' . $this->ReadPropertyString('StorageBucket') . '/' . $this->GetBuildingID() . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg', base64_decode(IPS_GetMediaContent($mediaID)));
 
-                    $url = 'https://storage.inspireprojekt.de/smarthome/' . $this->GetBuildingID() . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg';
+                    $url = 'https://storage.inspireprojekt.de/' . $this->ReadPropertyString('StorageBucket') . '/' . $this->GetBuildingID() . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg';
 
                     $this->SendData([$this->BuildMediaEntity($mediaID, $url)]);
                 }
@@ -581,7 +595,83 @@ class FIWARE extends IPSModule
         ]);
     }
 
-    private function RegisterBuilding()
+    public function Register()
+    {
+        $this->UpdateFormField("RegisterBuilding", "visible", true);
+    }
+    
+    public function RegisterBuilding($HubURL, $BuildingOwnerEMail, $BuildingOwnerName, $BuildingOwnerSurname, $BuildingStreet, $BuildingPostcode, $BuildingCity, $BuildingLocation, $BuildingPlan, $AcceptEULA, $AcceptDataProtection)
+    {
+        if(!$AcceptEULA) {
+            echo "Sie müssen den Allgemeinen Geschäftsbedingungen zustimmen!";
+            return;
+        }
+        if(!$AcceptDataProtection) {
+            echo "Sie müssen den Datenschutzbedingungen zustimmen!";
+            return;
+        }
+        
+        $location = json_decode($BuildingLocation, true);
+        $json = json_encode([
+            "name" => $BuildingOwnerName . " " . $BuildingOwnerSurname,
+            "address" => [
+                "value" => [
+                    "addressLocality" => $BuildingCity,
+                    "postalCode" => $BuildingPostcode,
+                    "streetAddress" => $BuildingStreet
+                ]
+            ],
+            'location' => [
+                'type'  => 'geo:json',
+                'value' => [
+                    'type'        => 'Point',
+                    'coordinates' => [
+                        $location['longitude'],
+                        $location['latitude']
+                    ]
+                ],
+                'metadata' => new stdClass()
+            ],
+        ]);
+        $this->SendDebug('Register', $json, 0);
+
+        $options = [
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\n" .
+                            'Content-Length:' . strlen($json) . "\r\n",
+                'content' => $json
+            ]
+        ];
+
+        $context = stream_context_create($options);
+
+        $content = file_get_contents($HubURL, false, $context);
+        $data = json_decode($content);
+        
+        $this->SendDebug('RegisterResult', $content, 0);
+        
+        $this->UpdateFormField("ServerSettings", "visible", true);
+        $this->UpdateFormField("ServerSettings", "expanded", true);
+         
+        $this->UpdateFormField("Host", "value", $data->contextBrokerUrl);
+        $this->UpdateFormField("AuthToken", "value", $data->authToken);
+        $this->UpdateFormField("StorageUsername", "value", $data->storage->username);
+        $this->UpdateFormField("StoragePassword", "value", $data->storage->password);
+        $this->UpdateFormField("StorageBucket", "value", $data->storage->bucket);
+        $this->UpdateFormField("StorageEndpoint", "value", $data->storage->url);
+        
+        $this->UpdateFormField("RegisterBuilding", "visible", false);
+        $this->UpdateFormField("RegisterBuildingPermissions", "visible", true);
+    }
+    
+    public function RegisterBuildingPermissions($Permissions)
+    {
+        $this->UpdateFormField("RegisterBuildingPermissions", "visible", false);
+        $this->UpdateFormField("RegisterBuildingComplete", "visible", true);
+    }
+        
+    private function RegisterBuildingLegacy()
     {
         $location = json_decode($this->ReadPropertyString('BuildingLocation'), true);
 
