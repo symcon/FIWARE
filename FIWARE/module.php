@@ -421,6 +421,20 @@ class FIWARE extends IPSModule
 
     public function RegisterBuildingPermissions(string $Permissions)
     {
+        switch ($Permissions) {
+            case 'allowed':
+                $this->AddAccessPrivilege('Feuerwehr', '*', strtotime('01.01.2030 00:00:00'));
+                break;
+
+                case 'request-required':
+
+                break;
+
+                case 'custom':
+
+                break;
+        }
+
         $this->UpdateFormField('RegisterBuildingPermissions', 'visible', false);
         $this->UpdateFormField('RegisterBuildingComplete', 'visible', true);
     }
