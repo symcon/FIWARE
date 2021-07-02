@@ -696,6 +696,8 @@
                     {
                         "type": "ValidationTextBox",
                         "name": "BuildingOwnerEMail",
+                        "validate": ".+@.+\\..+",
+                        "value": "mail@domain.com",
                         "caption": "E-Mail",
                         "width": "600px"
                     },
