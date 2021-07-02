@@ -109,18 +109,18 @@ class FIWARE extends IPSModule
     {
         $data = json_decode(file_get_contents(__DIR__ . '/form.json'));
 
-        if (!$this->ReadPropertyString("Host")) {
-            foreach($data->elements as $element) {
+        if (!$this->ReadPropertyString('Host')) {
+            foreach ($data->elements as $element) {
                 $element->visible = false;
             }
-            foreach($data->actions as $action) {
+            foreach ($data->actions as $action) {
                 $action->visible = false;
             }
             $data->actions[0]->visible = true;
             $data->actions[1]->visible = true;
             $data->actions[2]->visible = true;
         }
-        
+
         $elevation = $this->ReadAttributeFloat('BuildingElevation');
 
         if ($elevation == 0) {
@@ -347,6 +347,82 @@ class FIWARE extends IPSModule
         }
 
         $this->WriteAttributeString('AccessPrivileges', json_encode($accessPrivilege));
+    }
+
+    public function Register()
+    {
+        $this->UpdateFormField('RegisterBuilding', 'visible', true);
+    }
+
+    public function RegisterBuilding(string $HubURL, string $BuildingOwnerEMail, string $BuildingOwnerName, string $BuildingOwnerSurname, string $BuildingStreet, string $BuildingPostcode, string $BuildingCity, string $BuildingLocation, string $BuildingPlan, bool $AcceptEULA, bool $AcceptDataProtection)
+    {
+        if (!$AcceptEULA) {
+            echo 'Sie müssen den Allgemeinen Geschäftsbedingungen zustimmen!';
+            return;
+        }
+        if (!$AcceptDataProtection) {
+            echo 'Sie müssen den Datenschutzbedingungen zustimmen!';
+            return;
+        }
+
+        $location = json_decode($BuildingLocation, true);
+        $json = json_encode([
+            'name'    => $BuildingOwnerName . ' ' . $BuildingOwnerSurname,
+            'address' => [
+                'value' => [
+                    'addressLocality' => $BuildingCity,
+                    'postalCode'      => $BuildingPostcode,
+                    'streetAddress'   => $BuildingStreet
+                ]
+            ],
+            'location' => [
+                'type'  => 'geo:json',
+                'value' => [
+                    'type'        => 'Point',
+                    'coordinates' => [
+                        $location['longitude'],
+                        $location['latitude']
+                    ]
+                ],
+                'metadata' => new stdClass()
+            ],
+        ]);
+        $this->SendDebug('Register', $json, 0);
+
+        $options = [
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\n" .
+                            'Content-Length:' . strlen($json) . "\r\n",
+                'content' => $json
+            ]
+        ];
+
+        $context = stream_context_create($options);
+
+        $content = file_get_contents($HubURL, false, $context);
+        $data = json_decode($content);
+
+        $this->SendDebug('RegisterResult', $content, 0);
+
+        $this->UpdateFormField('ServerSettings', 'visible', true);
+        $this->UpdateFormField('ServerSettings', 'expanded', true);
+
+        $this->UpdateFormField('Host', 'value', $data->contextBrokerUrl);
+        $this->UpdateFormField('AuthToken', 'value', $data->authToken);
+        $this->UpdateFormField('StorageUsername', 'value', $data->storage->username);
+        $this->UpdateFormField('StoragePassword', 'value', $data->storage->password);
+        $this->UpdateFormField('StorageBucket', 'value', $data->storage->bucket);
+        $this->UpdateFormField('StorageEndpoint', 'value', $data->storage->url);
+
+        $this->UpdateFormField('RegisterBuilding', 'visible', false);
+        $this->UpdateFormField('RegisterBuildingPermissions', 'visible', true);
+    }
+
+    public function RegisterBuildingPermissions(string $Permissions)
+    {
+        $this->UpdateFormField('RegisterBuildingPermissions', 'visible', false);
+        $this->UpdateFormField('RegisterBuildingComplete', 'visible', true);
     }
 
     private function BuildEntity($ObjectID, $Type, $Time, $Location)
@@ -595,82 +671,6 @@ class FIWARE extends IPSModule
         ]);
     }
 
-    public function Register()
-    {
-        $this->UpdateFormField("RegisterBuilding", "visible", true);
-    }
-    
-    public function RegisterBuilding($HubURL, $BuildingOwnerEMail, $BuildingOwnerName, $BuildingOwnerSurname, $BuildingStreet, $BuildingPostcode, $BuildingCity, $BuildingLocation, $BuildingPlan, $AcceptEULA, $AcceptDataProtection)
-    {
-        if(!$AcceptEULA) {
-            echo "Sie müssen den Allgemeinen Geschäftsbedingungen zustimmen!";
-            return;
-        }
-        if(!$AcceptDataProtection) {
-            echo "Sie müssen den Datenschutzbedingungen zustimmen!";
-            return;
-        }
-        
-        $location = json_decode($BuildingLocation, true);
-        $json = json_encode([
-            "name" => $BuildingOwnerName . " " . $BuildingOwnerSurname,
-            "address" => [
-                "value" => [
-                    "addressLocality" => $BuildingCity,
-                    "postalCode" => $BuildingPostcode,
-                    "streetAddress" => $BuildingStreet
-                ]
-            ],
-            'location' => [
-                'type'  => 'geo:json',
-                'value' => [
-                    'type'        => 'Point',
-                    'coordinates' => [
-                        $location['longitude'],
-                        $location['latitude']
-                    ]
-                ],
-                'metadata' => new stdClass()
-            ],
-        ]);
-        $this->SendDebug('Register', $json, 0);
-
-        $options = [
-            'http' => [
-                'method' => 'POST',
-                'header' => "Content-Type: application/json\r\n" .
-                            'Content-Length:' . strlen($json) . "\r\n",
-                'content' => $json
-            ]
-        ];
-
-        $context = stream_context_create($options);
-
-        $content = file_get_contents($HubURL, false, $context);
-        $data = json_decode($content);
-        
-        $this->SendDebug('RegisterResult', $content, 0);
-        
-        $this->UpdateFormField("ServerSettings", "visible", true);
-        $this->UpdateFormField("ServerSettings", "expanded", true);
-         
-        $this->UpdateFormField("Host", "value", $data->contextBrokerUrl);
-        $this->UpdateFormField("AuthToken", "value", $data->authToken);
-        $this->UpdateFormField("StorageUsername", "value", $data->storage->username);
-        $this->UpdateFormField("StoragePassword", "value", $data->storage->password);
-        $this->UpdateFormField("StorageBucket", "value", $data->storage->bucket);
-        $this->UpdateFormField("StorageEndpoint", "value", $data->storage->url);
-        
-        $this->UpdateFormField("RegisterBuilding", "visible", false);
-        $this->UpdateFormField("RegisterBuildingPermissions", "visible", true);
-    }
-    
-    public function RegisterBuildingPermissions($Permissions)
-    {
-        $this->UpdateFormField("RegisterBuildingPermissions", "visible", false);
-        $this->UpdateFormField("RegisterBuildingComplete", "visible", true);
-    }
-        
     private function RegisterBuildingLegacy()
     {
         $location = json_decode($this->ReadPropertyString('BuildingLocation'), true);
