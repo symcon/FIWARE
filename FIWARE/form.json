@@ -7,14 +7,26 @@
             "items": [
                 {
                     "type": "ValidationTextBox",
-                    "name": "Host",
-                    "caption": "Host",
+                    "name": "HostContextBroker",
+                    "caption": "Host (Context-Broker)",
                     "width": "400px"
                 },
                 {
                     "type": "ValidationTextBox",
-                    "name": "AuthToken",
-                    "caption": "Authentication-Token",
+                    "name": "HostWebSocket",
+                    "caption": "Host (WebSocket)",
+                    "width": "400px"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "AuthTokenContextBroker",
+                    "caption": "Authentication-Token (Context-Broker)",
+                    "width": "400px"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "AuthTokenWebSocket",
+                    "caption": "Authentication-Token (WebSocket)",
                     "width": "400px"
                 },
                 {
@@ -46,6 +58,76 @@
                     "name": "GoogleMapsApiKey",
                     "caption": "Google Maps API-Key",
                     "width": "400px"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "BuildingSettings",
+            "caption": "Building Settings",
+            "items": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "BuildingID",
+                    "caption": "ID",
+                    "enabled": false
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "BuildingOwnerEMail",
+                    "caption": "E-Mail",
+                    "width": "300px"
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "BuildingOwnerName",
+                            "caption": "Name",
+                            "width": "130px"
+                        },
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "BuildingOwnerSurname",
+                            "caption": "Surname",
+                            "width": "160px"
+                        }
+                    ]
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "BuildingStreet",
+                    "caption": "Street",
+                    "width": "300px"
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "BuildingPostcode",
+                            "caption": "Postcode",
+                            "width": "100px"
+                        },
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "BuildingCity",
+                            "caption": "City",
+                            "width": "190px"
+                        }
+                    ]
+                },
+                {
+                    "type": "SelectLocation",
+                    "name": "BuildingLocation",
+                    "caption": "Location"
+                },
+                {
+                    "type": "SelectFile",
+                    "name": "BuildingPlan",
+                    "caption": "Plans (PDF)",
+                    "width": "300px"
                 }
             ]
         },
