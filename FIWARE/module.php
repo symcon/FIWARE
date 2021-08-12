@@ -472,7 +472,7 @@ class FIWARE extends IPSModule
         $this->UpdateFormField('RegisterBuildingPermissions', 'visible', true);
     }
 
-    public function RegisterBuildingPermissions($Permissions)
+    public function RegisterBuildingPermissions(string $Permissions)
     {
         switch ($Permissions) {
             case 'allowed':
