@@ -22,18 +22,26 @@ class FIWARE extends IPSModule
         $this->RegisterPropertyString('ActionWindows', '[]');
 
         //Server Properties
-        $this->RegisterPropertyString('Host', '');
-        $this->RegisterPropertyString('AuthToken', '');
+        $this->RegisterPropertyString('HostContextBroker', '');
+        $this->RegisterPropertyString('HostWebSocket', '');
+        $this->RegisterPropertyString('AuthTokenContextBroker', '');
+        $this->RegisterPropertyString('AuthTokenWebSocket', '');
 
         //Server Storage Properties
         $this->RegisterPropertyString('StorageUsername', '');
         $this->RegisterPropertyString('StoragePassword', '');
+        $this->RegisterPropertyString('StorageBucket', '');
+        $this->RegisterPropertyString('StorageEndpoint', '');
 
         //Google Maps Elevation Properties
         $this->RegisterPropertyString('GoogleMapsApiKey', '');
 
         //Building Properties
-        $this->RegisterPropertyString('BuildingLocation', '{"latitude": 0, "longitude": 0}');
+        $this->RegisterPropertyString('BuildingID', '');
+        $this->RegisterPropertyString('BuildingOwnerEMail', '');
+        $this->RegisterPropertyString('BuildingOwnerName', '');
+        $this->RegisterPropertyString('BuildingOwnerSurname', '');
+        $this->RegisterPropertyString('BuildingLocation', '');
         $this->RegisterPropertyString('BuildingStreet', '');
         $this->RegisterPropertyString('BuildingPostcode', '');
         $this->RegisterPropertyString('BuildingCity', '');
@@ -48,6 +56,16 @@ class FIWARE extends IPSModule
 
         //Access Privileges
         $this->RegisterAttributeString('AccessPrivileges', '[]');
+
+        //Create WebSocket Event channel
+        $this->RequireParent('{D68FD31F-0E90-7019-F16C-1949BD3079EF}');
+
+        //Register Allow/Deny profile
+        if (!IPS_VariableProfileExists('FW.AllowDeny')) {
+            IPS_CreateVariableProfile('FW.AllowDeny', 0);
+            IPS_SetVariableProfileAssociation('FW.AllowDeny', 0, 'Deny', '', 0xFF0000);
+            IPS_SetVariableProfileAssociation('FW.AllowDeny', 1, 'Allow', '', 0x00FF00);
+        }
     }
 
     public function Destroy()
@@ -61,11 +79,13 @@ class FIWARE extends IPSModule
         //Never delete this line!
         parent::ApplyChanges();
 
-        //Register the building
-        $this->RegisterBuilding();
+        //Update the building details
+        if ($this->ReadPropertyString('BuildingID')) {
+            $this->UpdateBuilding();
+        }
 
         //Update Building Elevation using Google Maps
-        $this->UpdateBuildingElevation();
+        //$this->UpdateBuildingElevation();
 
         //Delete all registrations in order to read them
         foreach ($this->GetMessageList() as $senderID => $messages) {
@@ -103,9 +123,34 @@ class FIWARE extends IPSModule
         }
     }
 
+    public function GetConfigurationForParent()
+    {
+        $url = 'wss://echo.websocket.org';
+        if ($this->ReadPropertyString('HostWebSocket')) {
+            $url = $this->ReadPropertyString('HostWebSocket') . '/?type=smartHome&componentId=' . $this->ReadPropertyString('AuthTokenWebSocket');
+        }
+
+        return json_encode([
+            'URL'               => $url,
+            'VerifyCertificate' => true,
+        ]);
+    }
+
     public function GetConfigurationForm()
     {
         $data = json_decode(file_get_contents(__DIR__ . '/form.json'));
+
+        if (!$this->ReadPropertyString('HostContextBroker')) {
+            foreach ($data->elements as $element) {
+                $element->visible = false;
+            }
+            foreach ($data->actions as $action) {
+                $action->visible = false;
+            }
+            $data->actions[0]->visible = true;
+            $data->actions[1]->visible = true;
+            $data->actions[2]->visible = true;
+        }
 
         $elevation = $this->ReadAttributeFloat('BuildingElevation');
 
@@ -115,7 +160,7 @@ class FIWARE extends IPSModule
             $elevation = number_format($elevation, 2, ',', '') . 'm';
         }
 
-        $data->actions[1]->caption = sprintf($this->Translate('Elevation: %s'), $elevation);
+        $data->actions[6]->caption = sprintf($this->Translate('Elevation: %s'), $elevation);
 
         $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
         foreach ($accessPrivilege as $key => $value) {
@@ -129,7 +174,7 @@ class FIWARE extends IPSModule
             ]);
         }
 
-        $data->actions[0]->items[0]->values = $accessPrivilege;
+        $data->actions[5]->items[0]->values = $accessPrivilege;
 
         return json_encode($data);
     }
@@ -174,8 +219,8 @@ class FIWARE extends IPSModule
 
     public function SendData(array $Entities)
     {
-        $url = $this->ReadPropertyString('Host') . '/v2/op/update';
-        $token = $this->ReadPropertyString('AuthToken');
+        $url = $this->ReadPropertyString('HostContextBroker') . '/v2/op/update';
+        $token = $this->ReadPropertyString('AuthTokenContextBroker');
 
         $data = [
             'actionType' => 'append',
@@ -191,13 +236,17 @@ class FIWARE extends IPSModule
                 'header' => "X-Auth-Token: $token\r\n" .
                     "Content-Type: application/json\r\n" .
                     'Content-Length:' . strlen($json) . "\r\n",
-                'content' => $json
+                'content'       => $json,
+                'ignore_errors' => true,
             ]
         ];
 
         $context = stream_context_create($options);
 
-        file_get_contents($url, false, $context);
+        $result = file_get_contents($url, false, $context);
+        if ($result) {
+            $this->SendDebug('RESPONSE', $result, 0);
+        }
     }
 
     public function SendVariableData()
@@ -246,7 +295,7 @@ class FIWARE extends IPSModule
                         'key'    => $this->ReadPropertyString('StorageUsername'),
                         'secret' => $this->ReadPropertyString('StoragePassword'),
                     ],
-                    'endpoint' => 'https://inspireprojekt.de'
+                    'endpoint' => $this->ReadPropertyString('StorageEndpoint')
                 ]);
                 $client->registerStreamWrapper();
 
@@ -257,9 +306,9 @@ class FIWARE extends IPSModule
 
                     $this->SendDebug('Sending', 'Image: ' . $mediaID . ', Observed: ' . date('d.m.Y H:i:s', $data[2]), 0);
 
-                    file_put_contents('s3://storage/smarthome/' . $this->GetBuildingID() . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg', base64_decode(IPS_GetMediaContent($mediaID)));
+                    file_put_contents('s3://storage/' . $this->ReadPropertyString('StorageBucket') . '/' . $this->ReadPropertyString('BuildingID') . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg', base64_decode(IPS_GetMediaContent($mediaID)));
 
-                    $url = 'https://storage.inspireprojekt.de/smarthome/' . $this->GetBuildingID() . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg';
+                    $url = 'https://storage.inspireprojekt.de/' . $this->ReadPropertyString('StorageBucket') . '/' . $this->ReadPropertyString('BuildingID') . '/' . $mediaID . '/' . date('Ymd_His', $data[2]) . '.jpg';
 
                     $this->SendData([$this->BuildMediaEntity($mediaID, $url)]);
                 }
@@ -288,9 +337,9 @@ class FIWARE extends IPSModule
 
         $this->SendDebug('Sending', 'Plan: ' . strlen($data) / 1024 . ' kB', 0);
 
-        file_put_contents('s3://storage/smarthome/' . $this->GetBuildingID() . '/plan.pdf', $data);
+        file_put_contents('s3://storage/smarthome/' . $this->ReadPropertyString('BuildingID') . '/plan.pdf', $data);
 
-        return 'https://storage.inspireprojekt.de/smarthome/' . $this->GetBuildingID() . '/plan.pdf';
+        return 'https://storage.inspireprojekt.de/smarthome/' . $this->ReadPropertyString('BuildingID') . '/plan.pdf';
     }
 
     public function AddAccessPrivilege(string $Requester, string $Scope, int $ValidUntil)
@@ -335,6 +384,185 @@ class FIWARE extends IPSModule
         $this->WriteAttributeString('AccessPrivileges', json_encode($accessPrivilege));
     }
 
+    public function Register()
+    {
+        $this->UpdateFormField('RegisterBuilding', 'visible', true);
+    }
+
+    public function RegisterBuilding(string $HubURL, string $BuildingOwnerEMail, string $BuildingOwnerName, string $BuildingOwnerSurname, string $BuildingStreet, string $BuildingPostcode, string $BuildingCity, string $BuildingLocation, string $BuildingPlan, bool $AcceptEULA, bool $AcceptDataProtection)
+    {
+        if (!$AcceptEULA) {
+            echo 'Sie müssen den Allgemeinen Geschäftsbedingungen zustimmen!';
+            return;
+        }
+        if (!$AcceptDataProtection) {
+            echo 'Sie müssen den Datenschutzbedingungen zustimmen!';
+            return;
+        }
+
+        $location = json_decode($BuildingLocation, true);
+        $json = json_encode([
+            'name'        => $BuildingOwnerName . ' ' . $BuildingOwnerSurname,
+            'email'       => $BuildingOwnerEMail,
+            'description' => IPS_GetName(0),
+            'address'     => [
+                'value' => [
+                    'addressLocality' => $BuildingCity,
+                    'postalCode'      => $BuildingPostcode,
+                    'streetAddress'   => $BuildingStreet
+                ]
+            ],
+            'location' => [
+                'type'  => 'geo:json',
+                'value' => [
+                    'type'        => 'Point',
+                    'coordinates' => [
+                        $location['longitude'],
+                        $location['latitude']
+                    ]
+                ],
+                'metadata' => new stdClass()
+            ],
+        ]);
+        $this->SendDebug('Register', $json, 0);
+
+        $options = [
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\n" .
+                            'Content-Length:' . strlen($json) . "\r\n",
+                'content' => $json
+            ]
+        ];
+
+        $context = stream_context_create($options);
+
+        $content = file_get_contents($HubURL, false, $context);
+
+        $data = json_decode($content);
+
+        $this->SendDebug('RegisterResult', $content, 0);
+
+        $this->UpdateFormField('ServerSettings', 'visible', true);
+        $this->UpdateFormField('ServerSettings', 'expanded', true);
+
+        $this->UpdateFormField('BuildingSettings', 'visible', true);
+        $this->UpdateFormField('BuildingSettings', 'expanded', true);
+
+        $this->UpdateFormField('HostContextBroker', 'value', $data->contextBrokerUrl);
+        $this->UpdateFormField('HostWebSocket', 'value', $data->websocketUrl);
+        $this->UpdateFormField('AuthTokenContextBroker', 'value', $data->authToken);
+        $this->UpdateFormField('AuthTokenWebSocket', 'value', $data->authToken);
+        $this->UpdateFormField('StorageUsername', 'value', $data->storage->username);
+        $this->UpdateFormField('StoragePassword', 'value', $data->storage->password);
+        $this->UpdateFormField('StorageBucket', 'value', $data->storage->bucket);
+        $this->UpdateFormField('StorageEndpoint', 'value', $data->storage->url);
+
+        $this->UpdateFormField('BuildingID', 'value', str_replace('urn:ngsi-ld:Building:', '', $data->buildingId));
+        $this->UpdateFormField('BuildingOwnerEMail', 'value', $BuildingOwnerEMail);
+        $this->UpdateFormField('BuildingOwnerName', 'value', $BuildingOwnerName);
+        $this->UpdateFormField('BuildingOwnerSurname', 'value', $BuildingOwnerSurname);
+        $this->UpdateFormField('BuildingStreet', 'value', $BuildingStreet);
+        $this->UpdateFormField('BuildingPostcode', 'value', $BuildingPostcode);
+        $this->UpdateFormField('BuildingCity', 'value', $BuildingCity);
+        $this->UpdateFormField('BuildingLocation', 'value', $BuildingLocation);
+        $this->UpdateFormField('BuildingPlan', 'value', $BuildingPlan);
+
+        $this->UpdateFormField('RegisterBuilding', 'visible', false);
+        $this->UpdateFormField('RegisterBuildingPermissions', 'visible', true);
+    }
+
+    public function RegisterBuildingPermissions(string $Permissions)
+    {
+        switch ($Permissions) {
+            case 'allowed':
+                $this->AddAccessPrivilege('Feuerwehr', '*', 2147483647);
+                break;
+            case 'request-required':
+                $this->AddAccessPrivilege('Feuerwehr', '', 2147483647);
+                break;
+            case 'custom':
+                // Open a new dialog for granular permission control
+                break;
+        }
+
+        $this->UpdateFormField('RegisterBuildingPermissions', 'visible', false);
+        $this->UpdateFormField('RegisterBuildingComplete', 'visible', true);
+    }
+
+    public function ReceiveData($JSONString)
+    {
+        $data = json_decode($JSONString);
+        $this->SendDebug('ReceiveData', utf8_decode($data->Buffer), 0);
+        $json = json_decode($data->Buffer, true);
+        $events = $json['data'];
+
+        foreach ($events as $event) {
+            $id = explode(':', $event['id']);
+            $id = intval(str_replace('Sensor', '', str_replace('Actuator', '', $id[3])));
+
+            //Receive only switch request for our building
+            if ($event['attachedTo']['attachedToId'] == 'urn:ngsi-ld:Building:' . $this->ReadPropertyString('BuildingID')) {
+                if (isset($event['action']['desiredValue'])) {
+                    $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
+                    $status = 'DENIED';
+                    foreach ($accessPrivilege as $privilege) {
+                        if ($privilege['ValidUntil'] > time()) {
+                            if ($privilege['Scope'] == '*') {
+                                $status = 'ALLOWED';
+                            } elseif ($status != 'ALLOWED') {
+                                $status = 'REQUEST';
+                            }
+                        }
+                    }
+                    switch ($status) {
+                        case 'ALLOWED':
+                            $status = $this->RequestDesiredValue($id, $event['action']['desiredValue']);
+                            $status = ($status === false) ? 'ERROR' : 'SUCCESS';
+                            break;
+                        case 'REQUEST':
+                            $this->NotifyForAction($id, $event);
+                            $status = 'PENDING';
+                            break;
+                        default:
+                            // DENIED
+                            break;
+                    }
+                    $this->SendConfirmation($event, $status);
+                }
+            }
+
+            //Receive all alerts
+            if (isset($event['info']['description'])) {
+                $this->RaiseAlarm($event['info']['description']);
+            }
+        }
+    }
+
+    public function RequestAction($Ident, $Value)
+    {
+
+        //Search Ident inside our pending state
+        $pendingActions = json_decode($this->GetBuffer('PendingActions'), true);
+        foreach ($pendingActions as $key => $value) {
+            if ($value['ident'] == $Ident) {
+                if ($Value) {
+                    $status = $this->RequestDesiredValue($value['id'], $value['event']['action']['desiredValue']);
+                    $status = ($status === false) ? 'ERROR' : 'SUCCESS';
+                } else {
+                    $status = 'DENIED';
+                }
+                $this->SendConfirmation($value['event'], $status);
+                $this->UnregisterVariable($Ident);
+                unset($pendingActions[$key]);
+                $this->SetBuffer('PendingActions', json_encode($pendingActions));
+                return;
+            }
+        }
+
+        throw new Exception('Invalid Ident');
+    }
+
     private function BuildEntity($ObjectID, $Type, $Time, $Location)
     {
         //Add fallback to building location if object location is not set
@@ -353,7 +581,7 @@ class FIWARE extends IPSModule
             'attachedTo' => [
                 'value' => [
                     'attachedToType' => 'Building',
-                    'attachedToId'   => 'urn:ngsi-ld:Building:' . $this->GetBuildingID()
+                    'attachedToId'   => 'urn:ngsi-ld:Building:' . $this->ReadPropertyString('BuildingID')
                 ]
             ],
             'name' => [
@@ -377,17 +605,6 @@ class FIWARE extends IPSModule
                 'metadata' => new stdClass()
             ]
         ];
-    }
-
-    private function GetBuildingID()
-    {
-        $buildingID = md5('FIWARE' . IPS_GetLicensee());
-
-        return substr($buildingID, 0, 8) . '-' .
-            substr($buildingID, 8, 4) . '-' .
-            substr($buildingID, 12, 4) . '-' .
-            substr($buildingID, 16, 4) . '-' .
-            substr($buildingID, 20, 12);
     }
 
     private function GetVariableProfile($VariableID)
@@ -581,19 +798,25 @@ class FIWARE extends IPSModule
         ]);
     }
 
-    private function RegisterBuilding()
+    private function UpdateBuilding()
     {
         $location = json_decode($this->ReadPropertyString('BuildingLocation'), true);
 
         $planUrl = $this->UploadBuildingPlan();
 
         $entity = [
-            'id'       => 'urn:ngsi-ld:Building:' . $this->GetBuildingID(),
+            'id'       => 'urn:ngsi-ld:Building:' . $this->ReadPropertyString('BuildingID'),
             'type'     => 'Building',
             'category' => [
                 'value' => [
                     'house'
                 ]
+            ],
+            'name' => [
+                'value' => $this->ReadPropertyString('BuildingOwnerName') . ' ' . $this->ReadPropertyString('BuildingOwnerSurname'),
+            ],
+            'email' => [
+                'value' => $this->ReadPropertyString('BuildingOwnerEMail'),
             ],
             'description' => [
                 'value' => IPS_GetName(0)
@@ -640,5 +863,75 @@ class FIWARE extends IPSModule
         if ($results['status'] == 'OK') {
             $this->WriteAttributeFloat('BuildingElevation', $results['results'][0]['elevation']);
         }
+    }
+
+    private function RequestDesiredValue($ID, $Value)
+    {
+        if ($Value === 'OPEN') {
+            $Value = true;
+        } elseif ($Value === 'CLOSE') {
+            $Value = false;
+        }
+        return RequestAction($ID, $Value);
+    }
+
+    private function SendConfirmation($event, $status)
+    {
+        $response = [
+            'id'     => $event['id'],
+            'type'   => $event['type'],
+            'action' => [
+                'type'  => 'StructuredValue',
+                'value' => [
+                    'status' => $status
+                ]
+            ]
+        ];
+        $this->SendData([$response]);
+    }
+
+    private function GenerateRandomString($length = 10)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
+    private function NotifyForAction($ID, $Event)
+    {
+        $this->SendDebug('PENDING', 'Waiting for confirmation... ' . sprintf("'%s' -> '%s'", IPS_GetName($ID), GetValueFormattedEx($ID, $Event['action']['desiredValue'])), 0);
+
+        $action = [
+            'ident' => $this->GenerateRandomString(),
+            'id'    => $ID,
+            'event' => $Event,
+        ];
+
+        // Add to pending actions state
+        $pendingActions = json_decode($this->GetBuffer('PendingActions'), true);
+        $pendingActions[] = $action;
+        $this->SetBuffer('PendingActions', json_encode($pendingActions));
+
+        // Add variable
+        $this->RegisterVariableBoolean($action['ident'], sprintf("Erlaube Schalten von '%s' auf '%s'", IPS_GetName($ID), GetValueFormattedEx($ID, $Event['action']['desiredValue'])), 'FW.AllowDeny');
+        $this->SetValue($action['ident'], true);
+        $this->EnableAction($action['ident']);
+
+        // Notify everyone
+        $wfcids = IPS_GetInstanceListByModuleID('{3565B1F2-8F7B-4311-A4B6-1BF1D868F39E}');
+        foreach ($wfcids as $id) {
+            if (@WFC_PushNotification($id, 'Alarm', sprintf("Die Feuerwehr Paderborn möchte im Notfall Geräte '%s' auf '%s' schalten. Bitte bestätigen!", IPS_GetName($ID), GetValueFormattedEx($ID, $Event['action']['desiredValue'])), '', $this->InstanceID) === false) {
+                $this->SendDebug('PNS', 'Could not send Push-Notification!', 0);
+            }
+        }
+    }
+
+    private function RaiseAlarm($description)
+    {
+        //ToDo
     }
 }

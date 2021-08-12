@@ -7,14 +7,26 @@
             "items": [
                 {
                     "type": "ValidationTextBox",
-                    "name": "Host",
-                    "caption": "Host",
+                    "name": "HostContextBroker",
+                    "caption": "Host (Context-Broker)",
                     "width": "400px"
                 },
                 {
                     "type": "ValidationTextBox",
-                    "name": "AuthToken",
-                    "caption": "Authentication-Token",
+                    "name": "HostWebSocket",
+                    "caption": "Host (WebSocket)",
+                    "width": "400px"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "AuthTokenContextBroker",
+                    "caption": "Authentication-Token (Context-Broker)",
+                    "width": "400px"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "AuthTokenWebSocket",
+                    "caption": "Authentication-Token (WebSocket)",
                     "width": "400px"
                 },
                 {
@@ -31,6 +43,18 @@
                 },
                 {
                     "type": "ValidationTextBox",
+                    "name": "StorageBucket",
+                    "caption": "Storage-Bucket",
+                    "width": "400px"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "StorageEndpoint",
+                    "caption": "Storage-Endpoint",
+                    "width": "400px"
+                },
+                {
+                    "type": "ValidationTextBox",
                     "name": "GoogleMapsApiKey",
                     "caption": "Google Maps API-Key",
                     "width": "400px"
@@ -43,9 +67,35 @@
             "caption": "Building Settings",
             "items": [
                 {
-                    "type": "SelectLocation",
-                    "name": "BuildingLocation",
-                    "caption": "Location"
+                    "type": "ValidationTextBox",
+                    "name": "BuildingID",
+                    "caption": "ID",
+                    "enabled": false
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "BuildingOwnerEMail",
+                    "validate": ".+@.+\\..+",
+                    "value": "mail@domain.com",                    
+                    "caption": "E-Mail",
+                    "width": "300px"
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "BuildingOwnerName",
+                            "caption": "Name",
+                            "width": "130px"
+                        },
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "BuildingOwnerSurname",
+                            "caption": "Surname",
+                            "width": "160px"
+                        }
+                    ]
                 },
                 {
                     "type": "ValidationTextBox",
@@ -69,6 +119,11 @@
                             "width": "190px"
                         }
                     ]
+                },
+                {
+                    "type": "SelectLocation",
+                    "name": "BuildingLocation",
+                    "caption": "Location"
                 },
                 {
                     "type": "SelectFile",
@@ -693,6 +748,161 @@
     ],
     "actions": [
         {
+            "type": "Label",
+            "caption": "Bitte die Registrierung durchführen, um weitere Einstellungen freizuschalten.",
+            "visible": false
+        },
+        {
+            "type": "Button",
+            "caption": "Registrieren",
+            "visible": false,
+            "onClick": "FW_Register($id);"
+        },
+        {
+            "type": "PopupAlert",
+            "name": "RegisterBuilding",
+            "popup": {
+                "closeCaption": "Abbrechen",
+                "items": [
+                    {
+                        "type": "Label",
+                        "caption": "Vielen Dank, dass Sie unser Produkt erworben haben und Ihr SmartHome mit der lokalen Feuerwehr verbinden möchten. Zur Anmeldung und Verifikation benötigen wir einige persönliche Daten, welche im folgenden ausgefüllt werden müssen. Bitte beachten Sie dazu auch unsere Allgemeinen Geschäftsbedingungen und Datenschutzbestimmungen.",
+                        "width": "600px"
+                    },
+                    {
+                        "type": "Select",
+                        "name": "HubURL",
+                        "caption": "Hub",
+                        "options": [
+                            { "caption": "INSPIRE.hub (Paderborn)", "value": "https://shregistry.inspireprojekt.de/smart-buildings/register" }
+                        ]
+                    },
+                    {
+                        "type": "ValidationTextBox",
+                        "name": "BuildingOwnerEMail",
+                        "validate": ".+@.+\\..+",
+                        "value": "mail@domain.com",
+                        "caption": "E-Mail",
+                        "width": "600px"
+                    },
+                    {
+                        "type": "RowLayout",
+                        "items": [
+                            {
+                                "type": "ValidationTextBox",
+                                "name": "BuildingOwnerName",
+                                "caption": "Name",
+                                "width": "300px"
+                            },
+                            {
+                                "type": "ValidationTextBox",
+                                "name": "BuildingOwnerSurname",
+                                "caption": "Surname",
+                                "width": "300px"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "ValidationTextBox",
+                        "name": "BuildingStreet",
+                        "caption": "Street",
+                        "width": "300px"
+                    },
+                    {
+                        "type": "RowLayout",
+                        "items": [
+                            {
+                                "type": "ValidationTextBox",
+                                "name": "BuildingPostcode",
+                                "caption": "Postcode",
+                                "width": "100px"
+                            },
+                            {
+                                "type": "ValidationTextBox",
+                                "name": "BuildingCity",
+                                "caption": "City",
+                                "width": "190px"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "SelectLocation",
+                        "name": "BuildingLocation",
+                        "caption": "Location"
+                    },
+                    {
+                        "type": "SelectFile",
+                        "name": "BuildingPlan",
+                        "caption": "Plans (PDF)",
+                        "width": "300px"
+                    },
+                    {
+                        "type": "CheckBox",
+                        "name": "AcceptEULA",
+                        "caption": "Ich stimme den Allgemeinen Geschäftsbedingungen zu",
+                        "width": "600px"
+                    },
+                    {
+                        "type": "CheckBox",
+                        "name": "AcceptDataProtection",
+                        "caption": "Ich stimme den Datenschutzbedingungen zu",
+                        "width": "600px"
+                    },
+                    {
+                        "type": "Button",
+                        "caption": "Registrieren",
+                        "onClick": "FW_RegisterBuilding($id, $HubURL, $BuildingOwnerEMail, $BuildingOwnerName, $BuildingOwnerSurname, $BuildingStreet, $BuildingPostcode, $BuildingCity, $BuildingLocation, $BuildingPlan, $AcceptEULA, $AcceptDataProtection);"
+                    }
+                ]
+            },
+            "visible": false
+        },
+        {
+            "type": "PopupAlert",
+            "name": "RegisterBuildingPermissions",
+            "popup": {
+                "closeCaption": "Abbrechen",
+                "items": [
+                    {
+                        "type": "Label",
+                        "caption": "Damit die Feuerwehr im Notfall bestmöglich reagieren kann wird der Zugriff auf ggf. verfügbare Sensoren, Aktoren und Kameras benötigt. Wir empfehlen der Feuerwehr den Zugriff immer zur Verfügung zu stellen. Die Rechte werden ausschließlich im Notfall benutzt und bei jeder Benutzung werden Sie entsprechend per Push Nachricht und E-Mail benachrichtigt. Alternativ können Sie die Rechte auch nur nach vorheriger Freigabe der Feuerwehr geben. Im Notfall bekommen Sie dann eine Nachricht mit der Aufforderung zur Freigabe. Bitte beachten Sie, dass dies wertvolle Zeit bei Ihrer Rettung kosten kann. Als Experte können Sie die Zugriffsrechte auch manuell konfigurieren (nicht empfohlen).",
+                        "width": "600px"
+                    },
+                    {
+                        "type": "Select",
+                        "name": "Permissions",
+                        "caption": "Permissions",
+                        "options": [
+                            { "caption": "Im Notfall den Zugriff auf Sensoren, Aktoren und Kameras erlauben", "value": "allowed" },
+                            { "caption": "Zugriff auf Sensoren, Aktoren und Kameras nur nach Freigabe erlauben", "value": "request-required" },
+                            { "caption": "Zugriffsrechte benutzerdefiniert gestalten", "value": "custom" }
+                        ],
+                        "width": "600px"
+                    },
+                    {
+                        "type": "Button",
+                        "caption": "Berechtigungen Speichern",
+                        "onClick": "FW_RegisterBuildingPermissions($id, $Permissions);"
+                    }
+                ]
+            },
+            "visible": false
+        },
+        {
+            "type": "PopupAlert",
+            "name": "RegisterBuildingComplete",
+            "popup": {
+                "items": [
+                    {
+                        "type": "Label",
+                        "caption": "Registrierung wurde erfolgreich abgeschlossen!",
+                        "width": "600px"
+                    }
+                ]
+            },
+            "visible": false
+        },
+        {
             "type": "ExpansionPanel",
             "name": "AccessList",
             "caption": "Access Privileges",
@@ -733,7 +943,8 @@
                                 "options": [
                                     { "caption": "Full Access", "value": "*" },
                                     { "caption": "Sensors", "value": "sensors" },
-                                    { "caption": "Actuators", "value": "actuators" }
+                                    { "caption": "Actuators", "value": "actuators" },
+                                    { "caption": "Request required", "value": "" }
                                 ]
                             }
                         },

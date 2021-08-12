@@ -72,7 +72,11 @@
             "Actuators": "Aktoren",
             "Who?": "Wer?",
             "Valid until": "Gültig bis",
-            "Scope": "Scope"
+            "Scope": "Scope",
+            "Name": "Vorname",
+            "Surname": "Nachname",
+            "Permissions": "Zugriffsrechte",
+            "Request required": "Zugriff anfragen"
         }
     }
 }
