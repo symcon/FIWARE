@@ -75,6 +75,8 @@
                 {
                     "type": "ValidationTextBox",
                     "name": "BuildingOwnerEMail",
+                    "validate": ".+@.+\\..+",
+                    "value": "mail@domain.com",                    
                     "caption": "E-Mail",
                     "width": "300px"
                 },
@@ -778,6 +780,8 @@
                     {
                         "type": "ValidationTextBox",
                         "name": "BuildingOwnerEMail",
+                        "validate": ".+@.+\\..+",
+                        "value": "mail@domain.com",
                         "caption": "E-Mail",
                         "width": "600px"
                     },
@@ -939,7 +943,8 @@
                                 "options": [
                                     { "caption": "Full Access", "value": "*" },
                                     { "caption": "Sensors", "value": "sensors" },
-                                    { "caption": "Actuators", "value": "actuators" }
+                                    { "caption": "Actuators", "value": "actuators" },
+                                    { "caption": "Request required", "value": "" }
                                 ]
                             }
                         },

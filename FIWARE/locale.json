@@ -75,7 +75,8 @@
             "Scope": "Scope",
             "Name": "Vorname",
             "Surname": "Nachname",
-            "Permissions": "Zugriffsrechte"
+            "Permissions": "Zugriffsrechte",
+            "Request required": "Zugriff anfragen"
         }
     }
 }

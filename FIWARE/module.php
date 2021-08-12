@@ -617,7 +617,7 @@ class FIWARE extends IPSModule
         $this->UpdateFormField("RegisterBuilding", "visible", true);
     }
     
-    public function RegisterBuilding($HubURL, $BuildingOwnerEMail, $BuildingOwnerName, $BuildingOwnerSurname, $BuildingStreet, $BuildingPostcode, $BuildingCity, $BuildingLocation, $BuildingPlan, $AcceptEULA, $AcceptDataProtection)
+    public function RegisterBuilding(string $HubURL, string $BuildingOwnerEMail, string $BuildingOwnerName, string $BuildingOwnerSurname, string $BuildingStreet, string $BuildingPostcode, string $BuildingCity, string $BuildingLocation, string $BuildingPlan, bool $AcceptEULA, bool $AcceptDataProtection)
     {
         if(!$AcceptEULA) {
             echo "Sie müssen den Allgemeinen Geschäftsbedingungen zustimmen!";
@@ -707,10 +707,10 @@ class FIWARE extends IPSModule
                 $this->AddAccessPrivilege("Feuerwehr", "*", PHP_INT_MAX);
                 break;
             case "request-required":
-                // Do nothing. We will trigger a mobile alert if the action force requests access
+                $this->AddAccessPrivilege('Feuerwehr', '', PHP_INT_MAX);
                 break;
             case "custom":
-                // Open next dialog
+                // Open a new dialog for granular permission control
                 break;
         }
         
