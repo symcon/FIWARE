@@ -59,6 +59,13 @@ class FIWARE extends IPSModule
         
         //Create WebSocket Event channel
         $this->RequireParent("{D68FD31F-0E90-7019-F16C-1949BD3079EF}");
+        
+        //Register Allow/Deny profile
+        if(!IPS_VariableProfileExists("FW.AllowDeny")) {
+            IPS_CreateVariableProfile("FW.AllowDeny", 0);
+            IPS_SetVariableProfileAssociation("FW.AllowDeny", 0, "Deny", "", 0xFF0000);
+            IPS_SetVariableProfileAssociation("FW.AllowDeny", 1, "Allow", "", 0x00FF00);
+        }
     }
 
     public function Destroy()
@@ -704,10 +711,10 @@ class FIWARE extends IPSModule
     {
         switch($Permissions) {
             case "allowed":
-                $this->AddAccessPrivilege("Feuerwehr", "*", PHP_INT_MAX);
+                $this->AddAccessPrivilege("Feuerwehr", "*", 2147483647);
                 break;
             case "request-required":
-                $this->AddAccessPrivilege('Feuerwehr', '', PHP_INT_MAX);
+                $this->AddAccessPrivilege('Feuerwehr', '', 2147483647);
                 break;
             case "custom":
                 // Open a new dialog for granular permission control
@@ -784,41 +791,79 @@ class FIWARE extends IPSModule
             $this->WriteAttributeFloat('BuildingElevation', $results['results'][0]['elevation']);
         }
     }
-    
+
+    private function RequestDesiredValue($ID, $Value) {
+        if($Value === "OPEN") {
+            $Value = true;
+        }
+        else if($Value === "CLOSE") {
+            $Value = false;
+        }
+        return RequestAction($ID, $Value);
+    }
+
+    private function SendConfirmation($event, $status) {
+        $response = [
+            "id" => $event["id"],
+            "type" => $event["type"],
+            "action" => [
+                "type" => "StructuredValue",
+                "value" => [
+                    "status" => $status
+                ]
+            ]
+        ];
+        $this->SendData([$response]);
+    }
+
+    private function GenerateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
+    private function NotifyForAction($ID, $Event) {
+            $this->SendDebug("PENDING", "Waiting for confirmation... " . sprintf("'%s' -> '%s'", IPS_GetName($ID), GetValueFormattedEx($ID, $Event['action']['desiredValue'])), 0);
+
+            $action = [
+                "ident" => $this->GenerateRandomString(),
+                "id" => $ID,
+                "event" => $Event,
+            ];
+
+            // Add to pending actions state
+            $pendingActions = json_decode($this->GetBuffer("PendingActions"), true);
+            $pendingActions[] = $action;
+            $this->SetBuffer("PendingActions", json_encode($pendingActions));
+            
+            // Add variable
+            $this->RegisterVariableBoolean($action['ident'], sprintf("Erlaube Schalten von '%s' auf '%s'", IPS_GetName($ID), GetValueFormattedEx($ID, $Event['action']['desiredValue'])), "FW.AllowDeny");
+            $this->SetValue($action['ident'], true);
+            $this->EnableAction($action['ident']);
+            
+            // Notify everyone
+            $wfcids = IPS_GetInstanceListByModuleID("{3565B1F2-8F7B-4311-A4B6-1BF1D868F39E}");
+            foreach($wfcids as $id) {
+                if(@WFC_PushNotification($id, "Alarm", sprintf("Die Feuerwehr Paderborn möchte im Notfall Geräte '%s' auf '%s' schalten. Bitte bestätigen!", IPS_GetName($ID), GetValueFormattedEx($ID, $Event['action']['desiredValue'])), "", $this->InstanceID) === false) {
+                    $this->SendDebug("PNS", "Could not send Push-Notification!", 0);
+                }
+            }
+    }
+
+    private function RaiseAlarm($description) {
+        //ToDo
+    }
+
     public function ReceiveData($JSONString) {
         
         $data = json_decode($JSONString);
         $this->SendDebug("ReceiveData", utf8_decode($data->Buffer), 0);
         $json = json_decode($data->Buffer, true);
         $events = $json['data'];
-        
-        $requestDesiredValue = function($ID, $Value) {
-            if($Value === "OPEN") {
-                $Value = true;
-            }
-            else if($Value === "CLOSE") {
-                $Value = false;
-            }
-            return RequestAction($ID, $Value);
-        };
-        
-        $sendConfirmation = function($event, $status) {
-            $response = [
-                "id" => $event["id"],
-                "type" => $event["type"],
-                "action" => [
-                    "type" => "StructuredValue",
-                    "value" => [
-                        "status" => ($status === false) ? "ERROR" : "SUCCESS"
-                    ]
-                ]
-            ];
-            $this->SendData([$response]);
-        };
-        
-        $raiseAlarm = function($description) {
-            //ToDo
-        };
         
         foreach($events as $event) {
             $id = explode(":", $event['id']);
@@ -827,16 +872,65 @@ class FIWARE extends IPSModule
             //Receive only switch request for our building
             if($event['attachedTo']['attachedToId'] == "urn:ngsi-ld:Building:" . $this->ReadPropertyString("BuildingID")) {
                 if(isset($event['action']['desiredValue'])) {
-                    //$status = "DENIED";
-                    $status = $requestDesiredValue($id, $event['action']['desiredValue']);
-                    $sendConfirmation($event, $status);
+                    $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
+                    $status = "DENIED";
+                    foreach ($accessPrivilege as $privilege) {
+                        if ($privilege['ValidUntil'] > time()) {
+                            if($privilege['Scope'] == "*") {
+                                $status = "ALLOWED";
+                            }
+                            elseif ($status != "ALLOWED") {
+                                $status = "REQUEST";
+                            }
+                        }
+                    }
+                    switch($status) {
+                        case "ALLOWED":
+                            $status = $this->RequestDesiredValue($id, $event['action']['desiredValue']);
+                            $status = ($status === false) ? "ERROR" : "SUCCESS";
+                            break;
+                        case "REQUEST":
+                            $this->NotifyForAction($id, $event);
+                            $status = "PENDING";
+                            break;
+                        default:
+                            // DENIED
+                            break;
+                    }
+                    $this->SendConfirmation($event, $status);
                 }
             }
             
             //Receive all alerts
             if(isset($event['info']['description'])) {
-                $raiseAlarm($event['info']['description']);
+                $this->RaiseAlarm($event['info']['description']);
             }
         }
     }
+
+    public function RequestAction($Ident, $Value) {
+
+        //Search Ident inside our pending state
+        $pendingActions = json_decode($this->GetBuffer("PendingActions"), true);
+        foreach ($pendingActions as $key => $value) {
+            if($value['ident'] == $Ident) {
+                if ($Value) {
+                    $status = $this->RequestDesiredValue($value['id'], $value['event']['action']['desiredValue']);
+                    $status = ($status === false) ? "ERROR" : "SUCCESS";
+                }
+                else {
+                    $status = "DENIED";
+                }
+                $this->SendConfirmation($value['event'], $status);
+                $this->UnregisterVariable($Ident);
+                unset($pendingActions[$key]);
+                $this->SetBuffer("PendingActions", json_encode($pendingActions));
+                return;
+            }
+        }
+        
+        throw new Exception("Invalid Ident");
+
+    }
+    
 }
