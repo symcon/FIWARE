@@ -24,8 +24,7 @@ class FIWARE extends IPSModule
         //Server Properties
         $this->RegisterPropertyString('HostContextBroker', '');
         $this->RegisterPropertyString('HostWebSocket', '');
-        $this->RegisterPropertyString('AuthTokenContextBroker', '');
-        $this->RegisterPropertyString('AuthTokenWebSocket', '');
+        $this->RegisterPropertyString('AuthToken', '');
 
         //Server Storage Properties
         $this->RegisterPropertyString('StorageUsername', '');
@@ -127,7 +126,7 @@ class FIWARE extends IPSModule
     {
         $url = 'wss://echo.websocket.org';
         if ($this->ReadPropertyString('HostWebSocket')) {
-            $url = $this->ReadPropertyString('HostWebSocket') . '/?type=smartHome&componentId=' . $this->ReadPropertyString('AuthTokenWebSocket');
+            $url = $this->ReadPropertyString('HostWebSocket') . '/?type=smartHome&componentId=' . $this->ReadPropertyString('AuthToken');
         }
 
         return json_encode([
@@ -220,7 +219,7 @@ class FIWARE extends IPSModule
     public function SendData(array $Entities)
     {
         $url = $this->ReadPropertyString('HostContextBroker') . '/v2/op/update';
-        $token = $this->ReadPropertyString('AuthTokenContextBroker');
+        $token = $this->ReadPropertyString('AuthToken');
 
         $data = [
             'actionType' => 'append',
@@ -451,8 +450,7 @@ class FIWARE extends IPSModule
 
         $this->UpdateFormField('HostContextBroker', 'value', $data->contextBrokerUrl);
         $this->UpdateFormField('HostWebSocket', 'value', $data->websocketUrl);
-        $this->UpdateFormField('AuthTokenContextBroker', 'value', $data->authToken);
-        $this->UpdateFormField('AuthTokenWebSocket', 'value', $data->authToken);
+        $this->UpdateFormField('AuthToken', 'value', $data->authToken);
         $this->UpdateFormField('StorageUsername', 'value', $data->storage->username);
         $this->UpdateFormField('StoragePassword', 'value', $data->storage->password);
         $this->UpdateFormField('StorageBucket', 'value', $data->storage->bucket);

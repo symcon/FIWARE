@@ -19,14 +19,8 @@
                 },
                 {
                     "type": "ValidationTextBox",
-                    "name": "AuthTokenContextBroker",
-                    "caption": "Authentication-Token (Context-Broker)",
-                    "width": "400px"
-                },
-                {
-                    "type": "ValidationTextBox",
-                    "name": "AuthTokenWebSocket",
-                    "caption": "Authentication-Token (WebSocket)",
+                    "name": "AuthToken",
+                    "caption": "Authentication-Token",
                     "width": "400px"
                 },
                 {
