@@ -124,6 +124,11 @@
                     "name": "BuildingPlan",
                     "caption": "Plans (PDF)",
                     "width": "300px"
+                },
+                {
+                    "type": "Label",
+                    "name": "BuildingElevation",
+                    "caption": ""
                 }
             ]
         },
@@ -954,10 +959,6 @@
                     ]
                 }
             ]
-        },
-        {
-            "type": "Label",
-            "caption": ""
         }
     ]
 }

@@ -159,7 +159,7 @@ class FIWARE extends IPSModule
             $elevation = number_format($elevation, 2, ',', '') . 'm';
         }
 
-        $data->actions[6]->caption = sprintf($this->Translate('Elevation: %s'), $elevation);
+        $data->elements[1]->items[7]->caption = sprintf($this->Translate('Elevation: %s'), $elevation);
 
         $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
         foreach ($accessPrivilege as $key => $value) {
