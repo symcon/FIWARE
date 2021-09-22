@@ -80,7 +80,7 @@ class FIWARE extends IPSModule
 
         //Update the building details
         if ($this->ReadPropertyString('BuildingID')) {
-            $this->UpdateBuilding();
+            $this->UpdateBuilding("NONE");
         }
 
         //Update Building Elevation using Google Maps
@@ -180,6 +180,10 @@ class FIWARE extends IPSModule
 
     public function MessageSink($Timestamp, $SenderID, $MessageID, $Data)
     {
+        if(!$this->GetBuffer("Permission")) {
+            return;
+        }
+        
         switch ($MessageID) {
             case VM_UPDATE:
             {
@@ -341,28 +345,26 @@ class FIWARE extends IPSModule
         return 'https://storage.inspireprojekt.de/smarthome/' . $this->ReadPropertyString('BuildingID') . '/plan.pdf';
     }
 
-    public function AddAccessPrivilege(string $Requester, string $Scope, int $ValidUntil)
+    public function AddAccessPrivilege(string $Requester, int $ValidUntil)
     {
         $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
 
         $accessPrivilege[] = [
             'Token'      => bin2hex(random_bytes(32)),
             'Requester'  => $Requester,
-            'Scope'      => $Scope,
             'ValidUntil' => $ValidUntil
         ];
 
         $this->WriteAttributeString('AccessPrivileges', json_encode($accessPrivilege));
     }
 
-    public function UpdateAccessPrivilege(string $Token, string $Requester, string $Scope, int $ValidUntil)
+    public function UpdateAccessPrivilege(string $Token, string $Requester, int $ValidUntil)
     {
         $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
 
         foreach ($accessPrivilege as $key => $value) {
             if ($value['Token'] == $Token) {
                 $accessPrivilege[$key]['Requester'] = $Requester;
-                $accessPrivilege[$key]['Scope'] = $Scope;
                 $accessPrivilege[$key]['ValidUntil'] = $ValidUntil;
             }
         }
@@ -473,14 +475,11 @@ class FIWARE extends IPSModule
     public function RegisterBuildingPermissions(string $Permissions)
     {
         switch ($Permissions) {
-            case 'allowed':
+            case 'granted':
                 $this->AddAccessPrivilege('Feuerwehr', '*', 2147483647);
                 break;
-            case 'request-required':
-                $this->AddAccessPrivilege('Feuerwehr', '', 2147483647);
-                break;
-            case 'custom':
-                // Open a new dialog for granular permission control
+            case 'approval':
+                // Do not add privilege. It needs to be requested
                 break;
         }
 
@@ -496,21 +495,16 @@ class FIWARE extends IPSModule
         $events = $json['data'];
 
         foreach ($events as $event) {
-            $id = explode(':', $event['id']);
-            $id = intval(str_replace('Sensor', '', str_replace('Actuator', '', $id[3])));
-
             //Receive only switch request for our building
-            if ($event['attachedTo']['attachedToId'] == 'urn:ngsi-ld:Building:' . $this->ReadPropertyString('BuildingID')) {
+            if (isset($event['attachedTo']) && $event['attachedTo']['attachedToId'] == 'urn:ngsi-ld:Building:' . $this->ReadPropertyString('BuildingID')) {
+                $id = explode(':', $event['id']);
+                $id = intval(str_replace('Sensor', '', str_replace('Actuator', '', $id[3])));
                 if (isset($event['action']['desiredValue'])) {
                     $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
                     $status = 'DENIED';
                     foreach ($accessPrivilege as $privilege) {
                         if ($privilege['ValidUntil'] > time()) {
-                            if ($privilege['Scope'] == '*') {
-                                $status = 'ALLOWED';
-                            } elseif ($status != 'ALLOWED') {
-                                $status = 'REQUEST';
-                            }
+                            $status = 'ALLOWED';
                         }
                     }
                     switch ($status) {
@@ -518,15 +512,29 @@ class FIWARE extends IPSModule
                             $status = $this->RequestDesiredValue($id, $event['action']['desiredValue']);
                             $status = ($status === false) ? 'ERROR' : 'SUCCESS';
                             break;
-                        case 'REQUEST':
-                            $this->NotifyForAction($id, $event);
-                            $status = 'PENDING';
-                            break;
                         default:
                             // DENIED
                             break;
                     }
                     $this->SendConfirmation($event, $status);
+                }
+            }
+            else {
+                if (isset($event['permission']) && ($event['permission'] == "REQUEST")) {
+                    $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
+                    $status = 'DENIED';
+                    foreach ($accessPrivilege as $privilege) {
+                        if ($privilege['ValidUntil'] > time()) {
+                            $status = 'GRANTED';
+                        }
+                    }
+                     if ($status == "GRANTED") {
+                         $this->UpdateBuilding("GRANTED");
+                     }
+                     else {
+                        $this->UpdateBuilding("PENDING");
+                        $this->NotifyForPermission($event);
+                     }
                 }
             }
 
@@ -540,22 +548,15 @@ class FIWARE extends IPSModule
     public function RequestAction($Ident, $Value)
     {
 
-        //Search Ident inside our pending state
-        $pendingActions = json_decode($this->GetBuffer('PendingActions'), true);
-        foreach ($pendingActions as $key => $value) {
-            if ($value['ident'] == $Ident) {
-                if ($Value) {
-                    $status = $this->RequestDesiredValue($value['id'], $value['event']['action']['desiredValue']);
-                    $status = ($status === false) ? 'ERROR' : 'SUCCESS';
-                } else {
-                    $status = 'DENIED';
-                }
-                $this->SendConfirmation($value['event'], $status);
-                $this->UnregisterVariable($Ident);
-                unset($pendingActions[$key]);
-                $this->SetBuffer('PendingActions', json_encode($pendingActions));
-                return;
+        if ($Ident == "Permission") {
+            if ($Value) {
+                $this->UpdateBuilding("GRANTED");
             }
+            else {
+                $this->UpdateBuilding("DENIED");
+            }
+            $this->UnregisterVariable($Ident);
+            return;
         }
 
         throw new Exception('Invalid Ident');
@@ -796,7 +797,7 @@ class FIWARE extends IPSModule
         ]);
     }
 
-    private function UpdateBuilding()
+    private function UpdateBuilding($Permission)
     {
         $location = json_decode($this->ReadPropertyString('BuildingLocation'), true);
 
@@ -842,6 +843,9 @@ class FIWARE extends IPSModule
             ],
             'floorPlan' => [
                 'value' => $planUrl
+            ],
+            'permission' => [
+                'value' => $Permission
             ]
         ];
 
@@ -873,21 +877,6 @@ class FIWARE extends IPSModule
         return RequestAction($ID, $Value);
     }
 
-    private function SendConfirmation($event, $status)
-    {
-        $response = [
-            'id'     => $event['id'],
-            'type'   => $event['type'],
-            'action' => [
-                'type'  => 'StructuredValue',
-                'value' => [
-                    'status' => $status
-                ]
-            ]
-        ];
-        $this->SendData([$response]);
-    }
-
     private function GenerateRandomString($length = 10)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -899,30 +888,19 @@ class FIWARE extends IPSModule
         return $randomString;
     }
 
-    private function NotifyForAction($ID, $Event)
+    private function NotifyForPermission($Event)
     {
-        $this->SendDebug('PENDING', 'Waiting for confirmation... ' . sprintf("'%s' -> '%s'", IPS_GetName($ID), GetValueFormattedEx($ID, $Event['action']['desiredValue'])), 0);
-
-        $action = [
-            'ident' => $this->GenerateRandomString(),
-            'id'    => $ID,
-            'event' => $Event,
-        ];
-
-        // Add to pending actions state
-        $pendingActions = json_decode($this->GetBuffer('PendingActions'), true);
-        $pendingActions[] = $action;
-        $this->SetBuffer('PendingActions', json_encode($pendingActions));
+        $this->SendDebug('PENDING', 'Waiting for confirmation...', 0);
 
         // Add variable
-        $this->RegisterVariableBoolean($action['ident'], sprintf("Erlaube Schalten von '%s' auf '%s'", IPS_GetName($ID), GetValueFormattedEx($ID, $Event['action']['desiredValue'])), 'FW.AllowDeny');
-        $this->SetValue($action['ident'], true);
-        $this->EnableAction($action['ident']);
+        $this->RegisterVariableBoolean("Permission", "Zugriff erlauben?", 'FW.AllowDeny');
+        $this->SetValue("Permission", true);
+        $this->EnableAction("Permission");
 
         // Notify everyone
         $wfcids = IPS_GetInstanceListByModuleID('{3565B1F2-8F7B-4311-A4B6-1BF1D868F39E}');
         foreach ($wfcids as $id) {
-            if (@WFC_PushNotification($id, 'Alarm', sprintf("Die Feuerwehr Paderborn möchte im Notfall Geräte '%s' auf '%s' schalten. Bitte bestätigen!", IPS_GetName($ID), GetValueFormattedEx($ID, $Event['action']['desiredValue'])), '', $this->InstanceID) === false) {
+            if (@WFC_PushNotification($id, 'Alarm', "Die Feuerwehr Paderborn möchte auf Ihr Gebäude zugreifen. Bitte bestätigen!", '', $this->InstanceID) === false) {
                 $this->SendDebug('PNS', 'Could not send Push-Notification!', 0);
             }
         }

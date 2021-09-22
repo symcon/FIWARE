@@ -872,9 +872,8 @@
                         "name": "Permissions",
                         "caption": "Permissions",
                         "options": [
-                            { "caption": "Im Notfall den Zugriff auf Sensoren, Aktoren und Kameras erlauben", "value": "allowed" },
-                            { "caption": "Zugriff auf Sensoren, Aktoren und Kameras nur nach Freigabe erlauben", "value": "request-required" },
-                            { "caption": "Zugriffsrechte benutzerdefiniert gestalten", "value": "custom" }
+                            { "caption": "Im Notfall den Zugriff auf Sensoren, Aktoren und Kameras erlauben", "value": "granted" },
+                            { "caption": "Zugriff auf Sensoren, Aktoren und Kameras nur nach Freigabe erlauben", "value": "approval" }
                         ],
                         "width": "600px"
                     },
@@ -912,8 +911,8 @@
                     "caption": "",
                     "add": true,
                     "delete": true,
-                    "onAdd": "$valid = json_decode($AccessList['ValidUntil']); $valid_until = mktime($valid->hour, $valid->minute, $valid->second, $valid->month, $valid->day, $valid->year); FW_AddAccessPrivilege($id, $AccessList['Requester'], $AccessList['Scope'], $valid_until);",
-                    "onEdit": "$valid = json_decode($AccessList['ValidUntil']); $valid_until = mktime($valid->hour, $valid->minute, $valid->second, $valid->month, $valid->day, $valid->year); FW_UpdateAccessPrivilege($id, $AccessList['Token'], $AccessList['Requester'], $AccessList['Scope'], $valid_until);",
+                    "onAdd": "$valid = json_decode($AccessList['ValidUntil']); $valid_until = mktime($valid->hour, $valid->minute, $valid->second, $valid->month, $valid->day, $valid->year); FW_AddAccessPrivilege($id, $AccessList['Requester'], $valid_until);",
+                    "onEdit": "$valid = json_decode($AccessList['ValidUntil']); $valid_until = mktime($valid->hour, $valid->minute, $valid->second, $valid->month, $valid->day, $valid->year); FW_UpdateAccessPrivilege($id, $AccessList['Token'], $AccessList['Requester'], $valid_until);",
                     "onDelete": "FW_DeleteAccessPrivilege($id, $AccessList['Token']);",
                     "columns": [
                         {
@@ -930,21 +929,6 @@
                             "add": "",
                             "edit": {
                                 "type": "ValidationTextBox"
-                            }
-                        },
-                        {
-                            "caption": "Scope",
-                            "name": "Scope",
-                            "width": "150px",
-                            "add": "*",
-                            "edit": {
-                                "type": "Select",
-                                "options": [
-                                    { "caption": "Full Access", "value": "*" },
-                                    { "caption": "Sensors", "value": "sensors" },
-                                    { "caption": "Actuators", "value": "actuators" },
-                                    { "caption": "Request required", "value": "" }
-                                ]
                             }
                         },
                         {
