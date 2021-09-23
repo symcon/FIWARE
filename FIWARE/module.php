@@ -561,9 +561,14 @@ class FIWARE extends IPSModule
                 if (isset($event['action']['desiredValue'])) {
                     $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
                     $status = 'DENIED';
-                    foreach ($accessPrivilege as $privilege) {
-                        if ($privilege['ValidUntil'] > time()) {
-                            $status = 'ALLOWED';
+                    if ($this->GetBuffer("Permission")) {
+                        $status = 'ALLOWED';
+                    }
+                    else {
+                        foreach ($accessPrivilege as $privilege) {
+                            if ($privilege['ValidUntil'] > time()) {
+                                $status = 'ALLOWED';
+                            }
                         }
                     }
                     switch ($status) {
