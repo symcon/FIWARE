@@ -252,6 +252,50 @@ class FIWARE extends IPSModule
         }
     }
 
+    public function UpdateEverything() {
+        //Register variable messages
+        $variableIDs = json_decode($this->ReadPropertyString('WatchVariables'), true);
+        foreach ($variableIDs as $variable) {
+            $this->SendVariable($variable['VariableID']);
+        }
+        $variableIDs = json_decode($this->ReadPropertyString('ActionLights'), true);
+        foreach ($variableIDs as $variable) {
+            $this->SendVariable($variable['VariableID']);
+        }
+        $variableIDs = json_decode($this->ReadPropertyString('ActionShutters'), true);
+        foreach ($variableIDs as $variable) {
+            $this->SendVariable($variable['VariableID']);
+        }
+        $variableIDs = json_decode($this->ReadPropertyString('ActionDoors'), true);
+        foreach ($variableIDs as $variable) {
+            $this->SendVariable($variable['VariableID']);
+        }
+        $variableIDs = json_decode($this->ReadPropertyString('ActionWindows'), true);
+        foreach ($variableIDs as $variable) {
+            $this->SendVariable($variable['VariableID']);
+        }
+
+        //Register media messages
+        $mediaIDs = json_decode($this->ReadPropertyString('WatchMedia'), true);
+        foreach ($mediaIDs as $media) {
+            $this->SendMedia($media['MediaID']);
+        }
+    }
+    
+    public function SendVariable($VariableID) {
+        if (IPS_SemaphoreEnter('SendVariablesSemaphore', 500)) {
+            $sendVariablesString = $this->GetBuffer('SendVariables');
+            $sendVariables = ($sendVariablesString == '') ? [] : json_decode($sendVariablesString, true);
+            $Data = [GetValue($VariableID), false, GetValue($VariableID), IPS_GetVariable($VariableID)['VariableUpdated'], IPS_GetVariable($VariableID)['VariableUpdated'], IPS_GetVariable($VariableID)['VariableChanged']];
+            $sendVariables[] = [$VariableID, $Data];
+            $this->SetBuffer('SendVariables', json_encode($sendVariables));
+            IPS_SemaphoreLeave('SendVariablesSemaphore');
+            if ($this->GetTimerInterval('SendVariablesTimer') == 0) {
+                $this->SetTimerInterval('SendVariablesTimer', 500);
+            }
+        }
+    }
+    
     public function SendVariableData()
     {
         if (IPS_SemaphoreEnter('SendVariablesSemaphore', 0)) {
@@ -283,6 +327,20 @@ class FIWARE extends IPSModule
         }
     }
 
+    public function SendMedia($MediaID) {
+        if (IPS_SemaphoreEnter('SendMediaSemaphore', 500)) {
+            $sendMediaString = $this->GetBuffer('SendMedia');
+            $sendMedia = ($sendMediaString == '') ? [] : json_decode($sendMediaString, true);
+            $Data = ["", 0, time()];
+            $sendMedia[] = [$MediaID, $Data];
+            $this->SetBuffer('SendMedia', json_encode($sendMedia));
+            IPS_SemaphoreLeave('SendMediaSemaphore');
+            if ($this->GetTimerInterval('SendMediaTimer') == 0) {
+                $this->SetTimerInterval('SendMediaTimer', 500);
+            }
+        }
+    }
+    
     public function SendMediaData()
     {
         if (IPS_SemaphoreEnter('SendMediaSemaphore', 0)) {
@@ -476,7 +534,8 @@ class FIWARE extends IPSModule
     {
         switch ($Permissions) {
             case 'granted':
-                $this->AddAccessPrivilege('Feuerwehr', '*', 2147483647);
+                $this->AddAccessPrivilege('Feuerwehr', 2147483647);
+                $this->UpdateEverything();
                 break;
             case 'approval':
                 // Do not add privilege. It needs to be requested
