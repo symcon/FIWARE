@@ -612,6 +612,8 @@ class FIWARE extends IPSModule
         if ($Ident == "Permission") {
             if ($Value) {
                 $this->UpdateBuilding("GRANTED");
+                $this->SetBuffer("Permission", "GRANTED");
+                $this->UpdateEverything();
             }
             else {
                 $this->UpdateBuilding("DENIED");
