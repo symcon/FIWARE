@@ -606,6 +606,21 @@ class FIWARE extends IPSModule
         }
     }
 
+    private function SendConfirmation($event, $status)
+    {
+        $response = [
+            'id'     => $event['id'],
+            'type'   => $event['type'],
+            'action' => [
+                'type'  => 'StructuredValue',
+                'value' => [
+                    'status' => $status
+                ]
+            ]
+        ];
+        $this->SendData([$response]);
+    }
+    
     public function RequestAction($Ident, $Value)
     {
 
