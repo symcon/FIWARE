@@ -81,6 +81,7 @@ class FIWARE extends IPSModule
         //Update the building details
         if ($this->ReadPropertyString('BuildingID')) {
             $this->UpdateBuilding("NONE");
+            $this->SetBuffer("Permission", "");
         }
 
         //Update Building Elevation using Google Maps
@@ -535,7 +536,6 @@ class FIWARE extends IPSModule
         switch ($Permissions) {
             case 'granted':
                 $this->AddAccessPrivilege('Feuerwehr', 2147483647);
-                $this->UpdateEverything();
                 break;
             case 'approval':
                 // Do not add privilege. It needs to be requested
@@ -589,6 +589,8 @@ class FIWARE extends IPSModule
                     }
                      if ($status == "GRANTED") {
                          $this->UpdateBuilding("GRANTED");
+                         $this->SetBuffer("Permission", "GRANTED");
+                         $this->UpdateEverything();
                      }
                      else {
                         $this->UpdateBuilding("PENDING");
