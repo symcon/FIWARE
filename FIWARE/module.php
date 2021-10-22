@@ -80,8 +80,8 @@ class FIWARE extends IPSModule
 
         //Update the building details
         if ($this->ReadPropertyString('BuildingID')) {
-            $this->UpdateBuilding("NONE");
-            $this->SetBuffer("Permission", "");
+            $this->UpdateBuilding('NONE');
+            $this->SetBuffer('Permission', '');
         }
 
         //Update Building Elevation using Google Maps
@@ -181,10 +181,10 @@ class FIWARE extends IPSModule
 
     public function MessageSink($Timestamp, $SenderID, $MessageID, $Data)
     {
-        if(!$this->GetBuffer("Permission")) {
+        if (!$this->GetBuffer('Permission')) {
             return;
         }
-        
+
         switch ($MessageID) {
             case VM_UPDATE:
             {
@@ -253,7 +253,8 @@ class FIWARE extends IPSModule
         }
     }
 
-    public function UpdateEverything() {
+    public function UpdateEverything()
+    {
         //Register variable messages
         $variableIDs = json_decode($this->ReadPropertyString('WatchVariables'), true);
         foreach ($variableIDs as $variable) {
@@ -297,7 +298,7 @@ class FIWARE extends IPSModule
             }
         }
     }
-    
+
     public function SendVariableData()
     {
         if (IPS_SemaphoreEnter('SendVariablesSemaphore', 0)) {
@@ -334,7 +335,7 @@ class FIWARE extends IPSModule
         if (IPS_SemaphoreEnter('SendMediaSemaphore', 500)) {
             $sendMediaString = $this->GetBuffer('SendMedia');
             $sendMedia = ($sendMediaString == '') ? [] : json_decode($sendMediaString, true);
-            $Data = ["", 0, time()];
+            $Data = ['', 0, time()];
             $sendMedia[] = [$MediaID, $Data];
             $this->SetBuffer('SendMedia', json_encode($sendMedia));
             IPS_SemaphoreLeave('SendMediaSemaphore');
@@ -343,7 +344,7 @@ class FIWARE extends IPSModule
             }
         }
     }
-    
+
     public function SendMediaData()
     {
         if (IPS_SemaphoreEnter('SendMediaSemaphore', 0)) {
@@ -563,10 +564,9 @@ class FIWARE extends IPSModule
                 if (isset($event['action']['desiredValue'])) {
                     $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
                     $status = 'DENIED';
-                    if ($this->GetBuffer("Permission")) {
+                    if ($this->GetBuffer('Permission')) {
                         $status = 'ALLOWED';
-                    }
-                    else {
+                    } else {
                         foreach ($accessPrivilege as $privilege) {
                             if ($privilege['ValidUntil'] > time()) {
                                 $status = 'ALLOWED';
@@ -584,9 +584,8 @@ class FIWARE extends IPSModule
                     }
                     $this->SendConfirmation($event, $status);
                 }
-            }
-            else {
-                if (isset($event['permission']) && ($event['permission'] == "REQUEST")) {
+            } else {
+                if (isset($event['permission']) && ($event['permission'] == 'REQUEST')) {
                     $accessPrivilege = json_decode($this->ReadAttributeString('AccessPrivileges'), true);
                     $status = 'DENIED';
                     foreach ($accessPrivilege as $privilege) {
@@ -594,15 +593,14 @@ class FIWARE extends IPSModule
                             $status = 'GRANTED';
                         }
                     }
-                     if ($status == "GRANTED") {
-                         $this->UpdateBuilding("GRANTED");
-                         $this->SetBuffer("Permission", "GRANTED");
-                         $this->UpdateEverything();
-                     }
-                     else {
-                        $this->UpdateBuilding("PENDING");
+                    if ($status == 'GRANTED') {
+                        $this->UpdateBuilding('GRANTED');
+                        $this->SetBuffer('Permission', 'GRANTED');
+                        $this->UpdateEverything();
+                    } else {
+                        $this->UpdateBuilding('PENDING');
                         $this->NotifyForPermission($event);
-                     }
+                    }
                 }
             }
 
@@ -611,6 +609,23 @@ class FIWARE extends IPSModule
                 $this->RaiseAlarm($event['info']['description']);
             }
         }
+    }
+
+    public function RequestAction($Ident, $Value)
+    {
+        if ($Ident == 'Permission') {
+            if ($Value) {
+                $this->UpdateBuilding('GRANTED');
+                $this->SetBuffer('Permission', 'GRANTED');
+                $this->UpdateEverything();
+            } else {
+                $this->UpdateBuilding('DENIED');
+            }
+            $this->UnregisterVariable($Ident);
+            return;
+        }
+
+        throw new Exception('Invalid Ident');
     }
 
     private function SendConfirmation($event, $status)
@@ -626,25 +641,6 @@ class FIWARE extends IPSModule
             ]
         ];
         $this->SendData([$response]);
-    }
-    
-    public function RequestAction($Ident, $Value)
-    {
-
-        if ($Ident == "Permission") {
-            if ($Value) {
-                $this->UpdateBuilding("GRANTED");
-                $this->SetBuffer("Permission", "GRANTED");
-                $this->UpdateEverything();
-            }
-            else {
-                $this->UpdateBuilding("DENIED");
-            }
-            $this->UnregisterVariable($Ident);
-            return;
-        }
-
-        throw new Exception('Invalid Ident');
     }
 
     private function BuildEntity($ObjectID, $Type, $Time, $Location)
@@ -978,14 +974,14 @@ class FIWARE extends IPSModule
         $this->SendDebug('PENDING', 'Waiting for confirmation...', 0);
 
         // Add variable
-        $this->RegisterVariableBoolean("Permission", "Zugriff erlauben?", 'FW.AllowDeny');
-        $this->SetValue("Permission", true);
-        $this->EnableAction("Permission");
+        $this->RegisterVariableBoolean('Permission', 'Zugriff erlauben?', 'FW.AllowDeny');
+        $this->SetValue('Permission', true);
+        $this->EnableAction('Permission');
 
         // Notify everyone
         $wfcids = IPS_GetInstanceListByModuleID('{3565B1F2-8F7B-4311-A4B6-1BF1D868F39E}');
         foreach ($wfcids as $id) {
-            if (@WFC_PushNotification($id, 'Alarm', "Die Feuerwehr Paderborn möchte auf Ihr Gebäude zugreifen. Bitte bestätigen!", '', $this->InstanceID) === false) {
+            if (@WFC_PushNotification($id, 'Alarm', 'Die Feuerwehr Paderborn möchte auf Ihr Gebäude zugreifen. Bitte bestätigen!', '', $this->InstanceID) === false) {
                 $this->SendDebug('PNS', 'Could not send Push-Notification!', 0);
             }
         }
