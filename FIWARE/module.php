@@ -282,8 +282,9 @@ class FIWARE extends IPSModule
             $this->SendMedia($media['MediaID']);
         }
     }
-    
-    public function SendVariable($VariableID) {
+
+    public function SendVariable(int $VariableID)
+    {
         if (IPS_SemaphoreEnter('SendVariablesSemaphore', 500)) {
             $sendVariablesString = $this->GetBuffer('SendVariables');
             $sendVariables = ($sendVariablesString == '') ? [] : json_decode($sendVariablesString, true);
@@ -328,7 +329,8 @@ class FIWARE extends IPSModule
         }
     }
 
-    public function SendMedia($MediaID) {
+    public function SendMedia(int $MediaID)
+    {
         if (IPS_SemaphoreEnter('SendMediaSemaphore', 500)) {
             $sendMediaString = $this->GetBuffer('SendMedia');
             $sendMedia = ($sendMediaString == '') ? [] : json_decode($sendMediaString, true);
