@@ -125,7 +125,7 @@ class FIWARE extends IPSModule
 
     public function GetConfigurationForParent()
     {
-        $url = 'wss://echo.websocket.org';
+        $url = 'wss://ws.ifelse.io';
         if ($this->ReadPropertyString('HostWebSocket')) {
             $url = $this->ReadPropertyString('HostWebSocket') . '/?type=smartHome&componentId=' . $this->ReadPropertyString('AuthToken');
         }
