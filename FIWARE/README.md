@@ -15,7 +15,7 @@ Beschreibung des Moduls.
 
 *
 
-### 2. Vorraussetzungen
+### 2. Voraussetzungen
 
 - IP-Symcon ab Version 5.2
 
