@@ -70,7 +70,7 @@
                     "type": "ValidationTextBox",
                     "name": "BuildingOwnerEMail",
                     "validate": ".+@.+\\..+",
-                    "value": "mail@domain.com",                    
+                    "value": "mail@domain.com",
                     "caption": "E-Mail",
                     "width": "300px"
                 },
@@ -420,7 +420,7 @@
                                                     "value": "equal"
                                                 },
                                                 {
-                                                    "caption": "Not equal (\u2260)",
+                                                    "caption": "Not equal (≠)",
                                                     "value": "notEqual"
                                                 },
                                                 {
@@ -428,7 +428,7 @@
                                                     "value": "greaterThan"
                                                 },
                                                 {
-                                                    "caption": "Greater or Equal (\u2265)",
+                                                    "caption": "Greater or Equal (≥)",
                                                     "value": "greaterThanInclusive"
                                                 },
                                                 {
@@ -436,7 +436,7 @@
                                                     "value": "lessThan"
                                                 },
                                                 {
-                                                    "caption": "Less or Equal (\u2264)",
+                                                    "caption": "Less or Equal (≤)",
                                                     "value": "lessThanInclusive"
                                                 }
                                             ]
@@ -478,7 +478,7 @@
                                                     "value": "equal"
                                                 },
                                                 {
-                                                    "caption": "Not equal (\u2260)",
+                                                    "caption": "Not equal (≠)",
                                                     "value": "notEqual"
                                                 },
                                                 {
@@ -486,7 +486,7 @@
                                                     "value": "greaterThan"
                                                 },
                                                 {
-                                                    "caption": "Greater or Equal (\u2265)",
+                                                    "caption": "Greater or Equal (≥)",
                                                     "value": "greaterThanInclusive"
                                                 },
                                                 {
@@ -494,7 +494,7 @@
                                                     "value": "lessThan"
                                                 },
                                                 {
-                                                    "caption": "Less or Equal (\u2264)",
+                                                    "caption": "Less or Equal (≤)",
                                                     "value": "lessThanInclusive"
                                                 }
                                             ]
@@ -536,7 +536,7 @@
                                                     "value": "equal"
                                                 },
                                                 {
-                                                    "caption": "Not equal (\u2260)",
+                                                    "caption": "Not equal (≠)",
                                                     "value": "notEqual"
                                                 },
                                                 {
@@ -544,7 +544,7 @@
                                                     "value": "greaterThan"
                                                 },
                                                 {
-                                                    "caption": "Greater or Equal (\u2265)",
+                                                    "caption": "Greater or Equal (≥)",
                                                     "value": "greaterThanInclusive"
                                                 },
                                                 {
@@ -552,7 +552,7 @@
                                                     "value": "lessThan"
                                                 },
                                                 {
-                                                    "caption": "Less or Equal (\u2264)",
+                                                    "caption": "Less or Equal (≤)",
                                                     "value": "lessThanInclusive"
                                                 }
                                             ]
@@ -773,7 +773,10 @@
                         "name": "HubURL",
                         "caption": "Hub",
                         "options": [
-                            { "caption": "INSPIRE.hub (Paderborn)", "value": "https://shregistry.inspireprojekt.de/smart-buildings/register" }
+                            {
+                                "caption": "INSPIRE.hub (Paderborn)",
+                                "value": "https://shregistry.inspireprojekt.de/smart-buildings/register"
+                            }
                         ]
                     },
                     {
@@ -872,8 +875,14 @@
                         "name": "Permissions",
                         "caption": "Permissions",
                         "options": [
-                            { "caption": "Im Notfall den Zugriff auf Sensoren, Aktoren und Kameras erlauben", "value": "granted" },
-                            { "caption": "Zugriff auf Sensoren, Aktoren und Kameras nur nach Freigabe erlauben", "value": "approval" }
+                            {
+                                "caption": "Im Notfall den Zugriff auf Sensoren, Aktoren und Kameras erlauben",
+                                "value": "granted"
+                            },
+                            {
+                                "caption": "Zugriff auf Sensoren, Aktoren und Kameras nur nach Freigabe erlauben",
+                                "value": "approval"
+                            }
                         ],
                         "width": "600px"
                     },
