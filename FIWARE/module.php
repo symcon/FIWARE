@@ -554,6 +554,11 @@ class FIWARE extends IPSModule
         $data = json_decode($JSONString);
         $this->SendDebug('ReceiveData', utf8_decode($data->Buffer), 0);
         $json = json_decode($data->Buffer, true);
+
+        if(!$json || !isset($json['data'])) {
+            return;
+        }
+
         $events = $json['data'];
 
         foreach ($events as $event) {
