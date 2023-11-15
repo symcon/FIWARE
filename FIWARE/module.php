@@ -187,37 +187,37 @@ class FIWARE extends IPSModule
 
         switch ($MessageID) {
             case VM_UPDATE:
-            {
-                $this->SendDebug('Collecting', 'Variable: ' . $SenderID . ', Value: ' . $Data[0] . ', Observed: ' . date('d.m.Y H:i:s', $Data[3]), 0);
+                {
+                    $this->SendDebug('Collecting', 'Variable: ' . $SenderID . ', Value: ' . $Data[0] . ', Observed: ' . date('d.m.Y H:i:s', $Data[3]), 0);
 
-                if (IPS_SemaphoreEnter('SendVariablesSemaphore', 500)) {
-                    $sendVariablesString = $this->GetBuffer('SendVariables');
-                    $sendVariables = ($sendVariablesString == '') ? [] : json_decode($sendVariablesString, true);
-                    $sendVariables[] = [$SenderID, $Data];
-                    $this->SetBuffer('SendVariables', json_encode($sendVariables));
-                    IPS_SemaphoreLeave('SendVariablesSemaphore');
-                    if ($this->GetTimerInterval('SendVariablesTimer') == 0) {
-                        $this->SetTimerInterval('SendVariablesTimer', 500);
+                    if (IPS_SemaphoreEnter('SendVariablesSemaphore', 500)) {
+                        $sendVariablesString = $this->GetBuffer('SendVariables');
+                        $sendVariables = ($sendVariablesString == '') ? [] : json_decode($sendVariablesString, true);
+                        $sendVariables[] = [$SenderID, $Data];
+                        $this->SetBuffer('SendVariables', json_encode($sendVariables));
+                        IPS_SemaphoreLeave('SendVariablesSemaphore');
+                        if ($this->GetTimerInterval('SendVariablesTimer') == 0) {
+                            $this->SetTimerInterval('SendVariablesTimer', 500);
+                        }
                     }
+                    break;
                 }
-                break;
-            }
             case MM_UPDATE:
-            {
-                $this->SendDebug('Collecting', 'Image: ' . $SenderID . ', Observed: ' . date('d.m.Y H:i:s', $Data[2]), 0);
+                {
+                    $this->SendDebug('Collecting', 'Image: ' . $SenderID . ', Observed: ' . date('d.m.Y H:i:s', $Data[2]), 0);
 
-                if (IPS_SemaphoreEnter('SendMediaSemaphore', 500)) {
-                    $sendMediaString = $this->GetBuffer('SendMedia');
-                    $sendMedia = ($sendMediaString == '') ? [] : json_decode($sendMediaString, true);
-                    $sendMedia[] = [$SenderID, $Data];
-                    $this->SetBuffer('SendMedia', json_encode($sendMedia));
-                    IPS_SemaphoreLeave('SendMediaSemaphore');
-                    if ($this->GetTimerInterval('SendMediaTimer') == 0) {
-                        $this->SetTimerInterval('SendMediaTimer', 500);
+                    if (IPS_SemaphoreEnter('SendMediaSemaphore', 500)) {
+                        $sendMediaString = $this->GetBuffer('SendMedia');
+                        $sendMedia = ($sendMediaString == '') ? [] : json_decode($sendMediaString, true);
+                        $sendMedia[] = [$SenderID, $Data];
+                        $this->SetBuffer('SendMedia', json_encode($sendMedia));
+                        IPS_SemaphoreLeave('SendMediaSemaphore');
+                        if ($this->GetTimerInterval('SendMediaTimer') == 0) {
+                            $this->SetTimerInterval('SendMediaTimer', 500);
+                        }
                     }
+                    break;
                 }
-                break;
-            }
         }
     }
 
@@ -555,7 +555,7 @@ class FIWARE extends IPSModule
         $this->SendDebug('ReceiveData', utf8_decode($data->Buffer), 0);
         $json = json_decode($data->Buffer, true);
 
-        if(!$json || !isset($json['data'])) {
+        if (!$json || !isset($json['data'])) {
             return;
         }
 
